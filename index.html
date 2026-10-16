@@ -694,10 +694,26 @@ footer .brand{justify-content:center;margin-bottom:10px;}
   width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(247,241,225,0.25);
   background:var(--night-2);color:var(--cream);font-family:'Space Grotesk';font-size:0.88rem;margin-bottom:10px;
 }
-.admin-results-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.admin-results-row .admin-results-pos{flex:none;width:88px;font-weight:600;color:var(--yellow);font-size:0.8rem;}
+.admin-results-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.admin-results-row .admin-results-pos{flex:none;width:88px;font-weight:600;color:var(--yellow);font-size:0.8rem;padding-top:10px;}
 .admin-results-row select{margin-bottom:0;flex:1;}
+.admin-results-selects{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;}
+.admin-results-select-line{display:flex;align-items:center;gap:8px;}
+.admin-results-select-line select{flex:1;min-width:0;}
+.admin-results-remove{
+  flex:none;width:30px;height:30px;border-radius:8px;border:1px solid rgba(232,72,59,0.4);
+  background:rgba(232,72,59,0.12);color:var(--cream);font-size:1rem;line-height:1;cursor:pointer;
+}
+.admin-results-remove:hover{background:rgba(232,72,59,0.25);}
+.admin-results-add{
+  flex:none;align-self:flex-start;margin-top:0;border:1px dashed rgba(244,196,48,0.5);
+  background:transparent;color:var(--yellow);border-radius:8px;padding:8px 12px;
+  font-family:'Space Grotesk';font-size:0.78rem;cursor:pointer;white-space:nowrap;
+}
+.admin-results-add:hover{background:rgba(244,196,48,0.1);}
 #admin-results-submit{margin-top:6px;}
+
+.rank-list .rank-tie{color:var(--teal);font-size:0.75rem;font-weight:600;margin-left:4px;}
 
 .hidden{display:none !important;}
 
@@ -2307,6 +2323,19 @@ function entryDisplayName(entry, allEntries){
 }
 let resultGames = (window.__gxGames || []).filter(g => POINTS_BAREME[g.slug]).map(g => ({ id: g.slug, slug: g.slug, format: 'individuel', name: g.name, icon: g.icon }));
 function resultDocId(id){ return KERMESSE_ID + '_' + id; }
+/* Rendu HTML d'un classement d'étape : plusieurs entrées peuvent partager la
+   même position (ex æquo, Round 31) — on l'indique explicitement plutôt que
+   de laisser deux points identiques se deviner tout seuls. */
+function renderRankingHTML(ranking){
+  const sorted = ranking.slice().sort((a,b) => a.position - b.position);
+  const counts = {};
+  sorted.forEach(r => { counts[r.position] = (counts[r.position] || 0) + 1; });
+  return '<ol class="rank-list">' + sorted.map(r => {
+    const tie = counts[r.position] > 1;
+    return '<li>' + r.pseudo + (tie ? ' <span class="rank-tie">ex æquo</span>' : '') +
+      ' <span class="pts">' + r.points + ' pt' + (r.points > 1 ? 's' : '') + '</span></li>';
+  }).join('') + '</ol>';
+}
 
 const baremeToggleBtn = document.getElementById('bareme-toggle');
 const baremeTableEl = document.getElementById('bareme-table');
@@ -2461,6 +2490,33 @@ function refreshResultsSelectOptions(){
   });
 }
 
+/* Une position peut accueillir plusieurs joueurs ex æquo (Round 31) : chaque
+   position a un select de base, plus un bouton "+ Ex æquo" qui ajoute d'autres
+   selects partageant le même data-position. Au moment d'enregistrer, chaque
+   select avec une valeur devient une entrée du ranking — rien à changer côté
+   sauvegarde, le modèle de données supportait déjà plusieurs entrées à la
+   même position, seul le formulaire ne permettait d'en saisir qu'une. */
+function addResultSelectLine(selectsWrap, pos, removable){
+  const line = document.createElement('div');
+  line.className = 'admin-results-select-line';
+  const sel = document.createElement('select');
+  sel.dataset.position = String(pos);
+  line.appendChild(sel);
+  if(removable){
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'admin-results-remove';
+    rm.title = 'Retirer ce joueur ex æquo';
+    rm.textContent = '×';
+    rm.addEventListener('click', () => {
+      line.remove();
+      refreshResultsSelectOptions();
+    });
+    line.appendChild(rm);
+  }
+  selectsWrap.appendChild(line);
+  return sel;
+}
 function buildResultsForm(){
   if(!adminResultsGameSelect) return;
   const id = adminResultsGameSelect.value;
@@ -2470,7 +2526,10 @@ function buildResultsForm(){
   const existing = getArResultsMap()[id];
   const existingByPos = {};
   if(existing && existing.ranking){
-    existing.ranking.forEach(r => { existingByPos[r.position] = r.email; });
+    existing.ranking.forEach(r => {
+      if(!existingByPos[r.position]) existingByPos[r.position] = [];
+      existingByPos[r.position].push(r.email);
+    });
   }
   adminResultsForm.innerHTML = '';
   for(let pos = 1; pos <= positions; pos++){
@@ -2480,17 +2539,33 @@ function buildResultsForm(){
     label.className = 'admin-results-pos';
     const posLabel = pos === 1 ? '1er' : (pos + 'e');
     label.textContent = posLabel + (bareme[pos-1] ? ' (' + bareme[pos-1] + ' pts)' : '');
-    const sel = document.createElement('select');
-    sel.dataset.position = String(pos);
+    const selectsWrap = document.createElement('div');
+    selectsWrap.className = 'admin-results-selects';
+    const existingEmails = existingByPos[pos] || [];
+    const lineCount = Math.max(1, existingEmails.length);
+    for(let i = 0; i < lineCount; i++){
+      addResultSelectLine(selectsWrap, pos, i > 0);
+    }
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'admin-results-add';
+    addBtn.textContent = '+ Ex æquo';
+    addBtn.addEventListener('click', () => {
+      addResultSelectLine(selectsWrap, pos, true);
+      refreshResultsSelectOptions();
+    });
     row.appendChild(label);
-    row.appendChild(sel);
+    row.appendChild(selectsWrap);
+    row.appendChild(addBtn);
     adminResultsForm.appendChild(row);
   }
   refreshResultsSelectOptions();
   if(existing){
-    adminResultsForm.querySelectorAll('select').forEach(sel => {
-      const pos = Number(sel.dataset.position);
-      if(existingByPos[pos]) sel.value = existingByPos[pos];
+    Object.keys(existingByPos).forEach(posStr => {
+      const pos = Number(posStr);
+      const emails = existingByPos[pos];
+      const selsAtPos = Array.from(adminResultsForm.querySelectorAll('select[data-position="' + pos + '"]'));
+      selsAtPos.forEach((sel, i) => { if(emails[i]) sel.value = emails[i]; });
     });
   }
 }
@@ -2691,8 +2766,7 @@ onSnapshot(qResults, (snap) => {
       body.innerHTML = 'Bientôt disponible';
       return;
     }
-    const sorted = res.ranking.slice().sort((a,b) => a.position - b.position);
-    body.innerHTML = '<ol class="rank-list">' + sorted.map(r => '<li>' + r.pseudo + ' <span class="pts">' + r.points + ' pt' + (r.points>1?'s':'') + '</span></li>').join('') + '</ol>';
+    body.innerHTML = renderRankingHTML(res.ranking);
   });
   if(arSelectedArenaId === 'gx-26-2'){ refreshResultsFormIfNeeded(); }
 });
@@ -3593,8 +3667,7 @@ async function renderDynamicArenaPage(kermesseId){
           body.innerHTML = 'Bientôt disponible';
           return;
         }
-        const sorted = rsnap.data().ranking.slice().sort((a,b) => a.position - b.position);
-        body.innerHTML = '<ol class="rank-list">' + sorted.map(r => '<li>' + r.pseudo + ' <span class="pts">' + r.points + ' pt' + (r.points > 1 ? 's' : '') + '</span></li>').join('') + '</ol>';
+        body.innerHTML = renderRankingHTML(rsnap.data().ranking);
       });
       dynamicArenaChildUnsubs.push(uRes);
     });
