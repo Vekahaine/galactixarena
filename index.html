@@ -1249,8 +1249,8 @@ nav .brand:hover{opacity:0.82;}
   <section id="classement">
   <div class="wrap">
     <span class="eyebrow-tag">Classements</span>
-    <h2 class="section-title">Classement par stand</h2>
-    <p class="section-desc">Un classement est établi pour chaque stand de cette arène. Les résultats et les points se mettent à jour en direct au fil de la kermesse. Le classement général cumulé est sur la page d'accueil.</p>
+    <h2 class="section-title">Classement</h2>
+    <p class="section-desc">Le classement général de cette arène (tous jeux confondus) est affiché en premier ci-dessous, suivi du détail par stand. Les résultats et les points se mettent à jour en direct au fil de la kermesse. Le classement cumulé de la saison est sur la page d'accueil.</p>
     <div class="bareme-block">
       <button class="bareme-toggle" id="bareme-toggle" type="button">Voir le barème de points</button>
       <div class="bareme-table hidden" id="bareme-table"></div>
@@ -2280,7 +2280,7 @@ if(participantsListEl){
       const p = d.data();
       const chip = document.createElement('div');
       chip.className = 'participant-chip';
-      chip.innerHTML = `<span class="chip-avatar" style="background:${avatarBg(p.avatar)}">${avatarInnerHTML(p.avatar)}</span><span>${p.pseudo}</span><span class="pts">${p.points || 0} pt</span>`;
+      chip.innerHTML = `<span class="chip-avatar" style="background:${avatarBg(p.avatar)}">${avatarInnerHTML(p.avatar)}</span><span>${p.pseudo}</span>`;
       participantsListEl.appendChild(chip);
     });
   });
@@ -2363,7 +2363,9 @@ function renderStaticRankGrid(gamesList){
   staticArenaGamesList = gamesList;
   const rankGridEl = document.getElementById('rank-grid');
   if(!rankGridEl) return;
-  rankGridEl.innerHTML = gamesList.map(g => '<div class="rank-card" id="rank-card-' + g.id + '"><span class="lock">🔒</span><h3>' + entryDisplayName(g, gamesList) + '</h3><div class="rank-status" id="rank-body-' + g.id + '">Bientôt disponible</div></div>').join('');
+  rankGridEl.innerHTML = '<div class="rank-card general"><span class="lock">🏆</span><h3>Classement général</h3><div class="rank-status" id="rank-general-body">Chargement…</div></div>' +
+    gamesList.map(g => '<div class="rank-card" id="rank-card-' + g.id + '"><span class="lock">🔒</span><h3>' + entryDisplayName(g, gamesList) + '</h3><div class="rank-status" id="rank-body-' + g.id + '">Bientôt disponible</div></div>').join('');
+  renderGeneralRanking();
 }
 function arenaStatusBadgeHtml(status){
   if(status === 'archived') return '<span class="status-badge status-archived"><span class="status-dot"></span>Archivée</span>';
@@ -3650,7 +3652,7 @@ async function renderDynamicArenaPage(kermesseId){
       if(participantsListEl2){
         participantsListEl2.innerHTML = list.length === 0
           ? '<div class="admin-empty">Personne pour l\'instant — sois le premier·ère à t\'inscrire !</div>'
-          : list.map(p => '<div class="participant-chip"><span class="chip-avatar" style="background:' + avatarBg(p.avatar) + '">' + avatarInnerHTML(p.avatar) + '</span><span>' + p.pseudo + '</span><span class="pts">' + (p.points || 0) + ' pt</span></div>').join('');
+          : list.map(p => '<div class="participant-chip"><span class="chip-avatar" style="background:' + avatarBg(p.avatar) + '">' + avatarInnerHTML(p.avatar) + '</span><span>' + p.pseudo + '</span></div>').join('');
       }
       const genEl = document.getElementById('dynamic-rank-general-body');
       if(genEl){
