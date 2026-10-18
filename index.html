@@ -1544,14 +1544,18 @@ function updateHeroNextArena(allArenas){
     if(labelEl) labelEl.textContent = 'Date à venir';
     if(footerNextArenaEl) footerNextArenaEl.textContent = 'Prochaine arène : date à venir';
   }
-  /* Pancarte de l'accueil : numéro de la PROCHAINE arène, calculé automatiquement
-     (nombre d'arènes déjà archivées + 1) dès qu'une arène passe en "archived" (Round 34).
+  /* Pancarte de l'accueil : numéro de la PROCHAINE arène, au format "saison.index"
+     (ex. #1.2 = saison 1, 2e arène de cette saison), calculé automatiquement à partir du
+     nombre d'arènes déjà archivées dans la même saison que la prochaine arène (Round 34,
+     corrigé Round 38 pour refléter le vrai format de numérotation de Volkan — l'ancien
+     compteur global #1/#2/#3... ignorait les saisons et affichait #2 au lieu de #1.2).
      Le texte du footer "Prochaine arène" est également piloté ici depuis Round 35, sur la
      même arène (la plus proche, toutes arènes confondues) plutôt que sur gx-26-2 seule. */
   const pancarteNumberEl = document.getElementById('pancarte-arena-number');
   if(pancarteNumberEl){
-    const archivedCount = (allArenas || []).filter(a => a.status === 'archived').length;
-    pancarteNumberEl.textContent = '#' + (archivedCount + 1);
+    const pancarteSeason = (best && best.season) || currentSeasonNumber || 1;
+    const archivedInSeason = (allArenas || []).filter(a => a.status === 'archived' && (a.season || 1) === pancarteSeason).length;
+    pancarteNumberEl.textContent = '#' + pancarteSeason + '.' + (archivedInSeason + 1);
   }
 }
 
