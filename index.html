@@ -525,7 +525,7 @@ nav .links a:hover{color:var(--yellow);}
 .live-link{display:inline-block;margin-top:16px;color:var(--yellow);font-family:'Fredoka';font-weight:600;font-size:0.9rem;text-decoration:none;}
 .live-link:hover{text-decoration:underline;}
 .annonce-embed{border-color:rgba(244,196,48,0.5);}
-.vod-header{padding:40px 24px 0;}
+.vod-header{padding:40px 24px 0;margin-bottom:28px;}
 .vod-banner{
   position:relative;max-width:900px;margin:0 auto;
   border-radius:16px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.45);
@@ -1367,6 +1367,17 @@ nav .brand:hover{opacity:0.82;}
     </div>
 
     <div class="community-section">
+      <h3 class="arenas-subtitle">Membres de la communauté</h3>
+      <p class="section-desc small">Tous les joueur·euses déjà inscrit·e·s et approuvé·e·s à une arène GALACTIX.</p>
+      <div class="participants-list" id="community-members-list"></div>
+    </div>
+
+    <div class="community-section">
+      <h3 class="arenas-subtitle">Classements</h3>
+      <p class="section-desc small">Tous les classements GALACTIX ARENA rassemblés ici : le classement général (saison en cours, une saison passée ou toutes saisons confondues), le classement final de chaque arène déjà jouée, et le classement par jeu, cumulé sur la saison en cours ou sur toutes les saisons.</p>
+    </div>
+
+    <div class="community-section">
       <h3 class="arenas-subtitle">Classement général GALACTIX ARENA <span class="season-badge" id="community-season-badge">Saison 1</span></h3>
       <p class="section-desc small">Tous les points remportés par chacun·e dans chaque arène de la saison choisie, cumulés. Le classement de l'accueil ne montre toujours que la saison en cours ; ici tu peux consulter les saisons précédentes.</p>
       <div class="pill-tabs" id="community-season-tabs"></div>
@@ -1387,15 +1398,10 @@ nav .brand:hover{opacity:0.82;}
       <div class="rank-grid" id="community-games-breakdown"></div>
     </div>
 
-    <div class="community-section">
-      <h3 class="arenas-subtitle">Membres de la communauté</h3>
-      <p class="section-desc small">Tous les joueur·euses déjà inscrit·e·s et approuvé·e·s à une arène GALACTIX.</p>
-      <div class="participants-list" id="community-members-list"></div>
-    </div>
-
     <div class="community-section" id="gx-community-archives">
       <h3 class="arenas-subtitle">Archives GALACTIX</h3>
       <p class="section-desc small">Résultats des arènes passées et souvenirs (photos, vidéos, liens) de la communauté.</p>
+      <div id="community-archived-arenas-list"></div>
       <div id="community-archives-list"></div>
     </div>
   </div>
@@ -3216,6 +3222,15 @@ function renderArenaRankingTabs(){
   communityArenaTabsEl.innerHTML = played.map(a => '<button type="button" class="pill-tab-btn' + (a.id === selectedArenaKermesseId ? ' active' : '') + '" data-kermesse="' + a.id + '">' + (a.shortName || a.name || a.id) + '</button>').join('');
   renderArenaRankingBody();
 }
+/* ---------- Archives GALACTIX : arènes terminées affichées comme sur la page Arènes (Round 39) ---------- */
+const communityArchivedArenasEl = document.getElementById('community-archived-arenas-list');
+function renderCommunityArchivedArenas(){
+  if(!communityArchivedArenasEl) return;
+  const played = (allArenasFull || []).filter(a => a.status === 'archived');
+  played.sort((a,b) => (parseArenaStartDate(b) || 0) - (parseArenaStartDate(a) || 0));
+  communityArchivedArenasEl.innerHTML = played.length === 0 ? '<div class="admin-empty">Aucune arène terminée pour le moment.</div>' : played.map(renderArenaCard).join('');
+  if(played.length > 0) wireArenaRegisterLinks(communityArchivedArenasEl);
+}
 
 if(communityLeaderboardEl || communityMembersEl || homeLeaderboardEl){
   onSnapshot(collection(db, 'arenas'), (asnap) => {
@@ -3232,6 +3247,7 @@ if(communityLeaderboardEl || communityMembersEl || homeLeaderboardEl){
     refreshSeasonSelectOptions();
     renderAllLeaderboards();
     renderArenaRankingTabs();
+    renderCommunityArchivedArenas();
     updateHeroNextArena(allArenasFull);
   });
   const qAllApproved = query(collection(db, 'registrations'), where('approved', '==', true));
