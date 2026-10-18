@@ -701,6 +701,12 @@ footer .brand{justify-content:center;margin-bottom:10px;}
 .admin-approve{background:var(--teal);color:#0c2b23;}
 .admin-refuse{background:rgba(232,72,59,0.7);color:#fff;}
 .admin-live{background:var(--red);color:#fff;}
+/* ---------- Edition inline d'une archive/VOD existante depuis l'admin (Round 37) ---------- */
+.admin-edit{background:rgba(244,196,48,0.85);color:#1a1a2e;}
+.admin-cancel{background:transparent;color:var(--cream-dim);border:2px solid rgba(247,241,225,0.25);}
+.admin-item-edit-form{width:100%;}
+.admin-item-edit-form .account-login{margin-bottom:10px;}
+.admin-item-edit-form .account-msg{margin-top:0;}
 .admin-empty{font-size:0.85rem;color:var(--cream-dim);}
 .admin-idea-list{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:10px 0 0;list-style:none;}
 .admin-idea-list li{background:var(--night-2);border:1px solid rgba(247,241,225,0.12);border-radius:999px;padding:6px 14px;font-size:0.8rem;color:var(--cream-dim);}
@@ -3399,6 +3405,60 @@ function vodEmbedHtml(url){
   }
   return '<a href="' + url + '" target="_blank" rel="noopener">▶️ Regarder la VOD ↗</a>';
 }
+/* ---------- Modification d'une archive/VOD existante depuis l'admin (Round 37) ---------- */
+function renderArchiveAdminRowView(row, a){
+  const kindLabel = a.kind === 'vod' ? ' · VOD' : ' · Souvenir';
+  row.innerHTML = '<div class="admin-item-info">' + (a.title || 'Sans titre') + '<span>' + (a.date || '') + kindLabel + '</span></div><div class="admin-actions"><button class="admin-btn admin-edit">Modifier</button><button class="admin-btn admin-refuse">Supprimer</button></div>';
+  row.querySelector('.admin-edit').addEventListener('click', () => renderArchiveAdminRowEdit(row, a));
+  row.querySelector('.admin-refuse').addEventListener('click', async () => {
+    if(window.confirm('Supprimer cette archive : ' + (a.title || '') + ' ?')){
+      await deleteDoc(doc(db, 'archives', a.id));
+    }
+  });
+}
+function renderArchiveAdminRowEdit(row, a){
+  row.innerHTML =
+    '<div class="admin-item-edit-form">' +
+      '<div class="account-login">' +
+        '<input type="text" class="archive-edit-title" placeholder="Titre">' +
+        '<input type="text" class="archive-edit-date" placeholder="Date">' +
+      '</div>' +
+      '<div class="account-login">' +
+        '<input type="url" class="archive-edit-url" placeholder="Lien (photo, vidéo, VOD... optionnel)">' +
+        '<input type="text" class="archive-edit-desc" placeholder="Description courte">' +
+      '</div>' +
+      '<div class="admin-actions">' +
+        '<button class="admin-btn admin-approve admin-edit-save">Enregistrer</button>' +
+        '<button class="admin-btn admin-cancel admin-edit-cancel">Annuler</button>' +
+      '</div>' +
+      '<div class="account-msg admin-edit-msg"></div>' +
+    '</div>';
+  row.querySelector('.archive-edit-title').value = a.title || '';
+  row.querySelector('.archive-edit-date').value = a.date || '';
+  row.querySelector('.archive-edit-url').value = a.url || '';
+  row.querySelector('.archive-edit-desc').value = a.description || '';
+  row.querySelector('.admin-edit-cancel').addEventListener('click', () => renderArchiveAdminRowView(row, a));
+  row.querySelector('.admin-edit-save').addEventListener('click', async () => {
+    const msg = row.querySelector('.admin-edit-msg');
+    const newTitle = row.querySelector('.archive-edit-title').value.trim();
+    if(!newTitle){
+      msg.textContent = 'Le titre est obligatoire.';
+      msg.className = 'account-msg err admin-edit-msg';
+      return;
+    }
+    try {
+      await updateDoc(doc(db, 'archives', a.id), {
+        title: newTitle,
+        date: row.querySelector('.archive-edit-date').value.trim(),
+        url: row.querySelector('.archive-edit-url').value.trim(),
+        description: row.querySelector('.archive-edit-desc').value.trim()
+      });
+    } catch(e){
+      msg.textContent = e.message;
+      msg.className = 'account-msg err admin-edit-msg';
+    }
+  });
+}
 const communityArchivesEl = document.getElementById('community-archives-list');
 const adminArchivesListEl = document.getElementById('admin-archives-list');
 const vodListEl = document.getElementById('vod-list');
@@ -3438,13 +3498,7 @@ if(communityArchivesEl || adminArchivesListEl || vodListEl){
         latestArchives.forEach(a => {
           const row = document.createElement('div');
           row.className = 'admin-item';
-          const kindLabel = a.kind === 'vod' ? ' · VOD' : ' · Souvenir';
-          row.innerHTML = '<div class="admin-item-info">' + (a.title || 'Sans titre') + '<span>' + (a.date || '') + kindLabel + '</span></div><div class="admin-actions"><button class="admin-btn admin-refuse">Supprimer</button></div>';
-          row.querySelector('.admin-refuse').addEventListener('click', async () => {
-            if(window.confirm('Supprimer cette archive : ' + (a.title || '') + ' ?')){
-              await deleteDoc(doc(db, 'archives', a.id));
-            }
-          });
+          renderArchiveAdminRowView(row, a);
           adminArchivesListEl.appendChild(row);
         });
       }
