@@ -1348,8 +1348,8 @@ nav .brand:hover{opacity:0.82;}
 <section id="gx-community">
   <div class="wrap">
     <span class="eyebrow-tag">GALACTIX ARENA</span>
-    <h2 class="section-title">Classements</h2>
-    <p class="section-desc">Le hub GALACTIX : le site, le Discord, les archives et tous les membres de la communauté.</p>
+    <h2 class="section-title">Le Hub GALACTIX</h2>
+    <p class="section-desc">Le site, le Discord, les archives et tous les membres de la communauté GALACTIX, réunis au même endroit.</p>
 
     <div class="community-links">
       <a href="https://portail-vkn.example" target="_blank" rel="noopener" class="community-link-card">
@@ -1373,8 +1373,9 @@ nav .brand:hover{opacity:0.82;}
     </div>
 
     <div class="community-section">
-      <h3 class="arenas-subtitle">Classements</h3>
-      <p class="section-desc small">Tous les classements GALACTIX ARENA rassemblés ici : le classement général (saison en cours, une saison passée ou toutes saisons confondues), le classement final de chaque arène déjà jouée, et le classement par jeu, cumulé sur la saison en cours ou sur toutes les saisons.</p>
+      <span class="eyebrow-tag">GALACTIX ARENA</span>
+      <h2 class="section-title">Classements</h2>
+      <p class="section-desc">Le hub GALACTIX : le site, le Discord, les archives et tous les membres de la communauté.</p>
     </div>
 
     <div class="community-section">
@@ -3230,6 +3231,7 @@ function renderCommunityArchivedArenas(){
   played.sort((a,b) => (parseArenaStartDate(b) || 0) - (parseArenaStartDate(a) || 0));
   communityArchivedArenasEl.innerHTML = played.length === 0 ? '<div class="admin-empty">Aucune arène terminée pour le moment.</div>' : played.map(renderArenaCard).join('');
   if(played.length > 0) wireArenaRegisterLinks(communityArchivedArenasEl);
+  renderCommunityArchivesList();
 }
 
 if(communityLeaderboardEl || communityMembersEl || homeLeaderboardEl){
@@ -3483,6 +3485,21 @@ const communityArchivesEl = document.getElementById('community-archives-list');
 const adminArchivesListEl = document.getElementById('admin-archives-list');
 const vodListEl = document.getElementById('vod-list');
 let latestArchives = [];
+function renderCommunityArchivesList(){
+  if(!communityArchivesEl) return;
+  const souvenirs = latestArchives.filter(a => a.kind !== 'vod');
+  const hasArchivedArenas = (allArenasFull || []).some(a => a.status === 'archived');
+  if(souvenirs.length === 0 && !hasArchivedArenas){
+    communityArchivesEl.innerHTML = '<div class="admin-empty">Aucune archive pour l\'instant.</div>';
+  } else if(souvenirs.length === 0){
+    communityArchivesEl.innerHTML = '';
+  } else {
+    communityArchivesEl.innerHTML = souvenirs.map(a => {
+      const link = a.url ? ('<a href="' + a.url + '" target="_blank" rel="noopener">Voir ↗</a>') : '';
+      return '<div class="archive-card"><h4>' + (a.title || 'Sans titre') + '</h4><div class="archive-date">' + (a.date || '') + '</div><p>' + (a.description || '') + '</p>' + link + '</div>';
+    }).join('');
+  }
+}
 if(communityArchivesEl || adminArchivesListEl || vodListEl){
   const qArchives = query(collection(db, 'archives'), orderBy('date', 'desc'));
   onSnapshot(qArchives, (snap) => {
@@ -3490,16 +3507,7 @@ if(communityArchivesEl || adminArchivesListEl || vodListEl){
     snap.forEach(d => latestArchives.push({ id: d.id, ...d.data() }));
     const souvenirs = latestArchives.filter(a => a.kind !== 'vod');
     const vods = latestArchives.filter(a => a.kind === 'vod');
-    if(communityArchivesEl){
-      if(souvenirs.length === 0){
-        communityArchivesEl.innerHTML = '<div class="admin-empty">Aucune archive pour l\'instant.</div>';
-      } else {
-        communityArchivesEl.innerHTML = souvenirs.map(a => {
-          const link = a.url ? ('<a href="' + a.url + '" target="_blank" rel="noopener">Voir ↗</a>') : '';
-          return '<div class="archive-card"><h4>' + (a.title || 'Sans titre') + '</h4><div class="archive-date">' + (a.date || '') + '</div><p>' + (a.description || '') + '</p>' + link + '</div>';
-        }).join('');
-      }
-    }
+    renderCommunityArchivesList();
     if(vodListEl){
       if(vods.length === 0){
         vodListEl.innerHTML = '<div class="admin-empty">Aucune VOD pour l\'instant.</div>';
