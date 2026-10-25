@@ -404,6 +404,32 @@ nav .links a:hover{color:var(--yellow);}
 }
 .leaderboard-row,.participant-chip{cursor:pointer;transition:transform .15s ease,border-color .15s ease;}
 .leaderboard-row:hover,.participant-chip:hover{border-color:rgba(247,241,225,0.35);transform:translateY(-1px);}
+/* ---------- Fiche profil au survol d'un pseudo (Round 41) ---------- */
+.rank-list li[data-email]{cursor:pointer;transition:border-color .15s ease;}
+.rank-list li[data-email]:hover{border-color:rgba(247,241,225,0.35);}
+.leaderboard-row.tie{border-color:rgba(47,191,159,0.4);}
+.gx-hovercard{
+  position:fixed;z-index:160;width:290px;max-width:calc(100vw - 24px);
+  background:var(--night-2);border:1px solid rgba(247,241,225,0.18);border-radius:16px;
+  padding:16px 18px;box-shadow:0 18px 40px rgba(0,0,0,0.45);
+  opacity:0;transform:translateY(6px);transition:opacity .15s ease,transform .15s ease;pointer-events:none;
+}
+.gx-hovercard.visible{opacity:1;transform:translateY(0);}
+.gx-hovercard-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.gx-hovercard-avatar{
+  width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.35rem;overflow:hidden;flex:none;background:var(--night-3);
+}
+.gx-hovercard-avatar img{width:100%;height:100%;object-fit:cover;}
+.gx-hovercard-name{font-family:'Fredoka';font-weight:700;font-size:1.1rem;color:var(--cream);line-height:1.15;}
+.gx-hovercard-sub{font-size:0.78rem;color:var(--cream-dim);margin-top:2px;}
+.gx-hovercard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.gx-hovercard-stat{background:var(--night-3);border-radius:10px;padding:7px 6px;text-align:center;}
+.gx-hovercard-stat b{display:block;font-family:'Fredoka';font-weight:700;color:var(--yellow);font-size:1rem;}
+.gx-hovercard-stat span{font-size:0.66rem;color:var(--cream-dim);text-transform:uppercase;letter-spacing:.04em;}
+.gx-hovercard-row{font-size:0.8rem;color:var(--cream);margin-top:5px;}
+.gx-hovercard-row strong{color:var(--cream-dim);font-weight:500;}
+.gx-hovercard-foot{margin-top:10px;font-size:0.7rem;color:var(--cream-dim);border-top:1px solid rgba(247,241,225,0.08);padding-top:8px;}
 .gx-toast{
   position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
   background:var(--night-2);color:var(--cream);border:1px solid rgba(247,241,225,0.2);
@@ -1559,7 +1585,7 @@ function updateHeroNextArena(allArenas){
      même arène (la plus proche, toutes arènes confondues) plutôt que sur gx-26-2 seule. */
   const pancarteNumberEl = document.getElementById('pancarte-arena-number');
   if(pancarteNumberEl){
-    const pancarteSeason = (best && best.season) || currentSeasonNumber || 1;
+    const pancarteSeason = (best && best.season) || Math.max(1, ...(allArenas || []).map(a => a.season || 1));
     const archivedInSeason = (allArenas || []).filter(a => a.status === 'archived' && (a.season || 1) === pancarteSeason).length;
     pancarteNumberEl.textContent = '#' + pancarteSeason + '.' + (archivedInSeason + 1);
   }
@@ -2510,8 +2536,8 @@ function resultDocId(id){ return KERMESSE_ID + '_' + id; }
    tous les classements du site utilisent le même style de ligne, avec la
    position écrite explicitement avant le pseudo. */
 function ordinalLabel(n){ return n === 1 ? '1er' : (n + 'e'); }
-function rankRowHTML(position, pseudo, points, tie){
-  return '<li' + (tie ? ' class="tie"' : '') + '><span class="rank-pos">' + ordinalLabel(position) + '</span><span class="rank-name">' + pseudo + (tie ? ' <span class="rank-tie">ex æquos</span>' : '') + '</span><span class="pts">' + points + ' pt' + (points > 1 ? 's' : '') + '</span></li>';
+function rankRowHTML(position, pseudo, points, tie, email){
+  return '<li' + (tie ? ' class="tie"' : '') + (email ? ' data-email="' + email + '"' : '') + '><span class="rank-pos">' + ordinalLabel(position) + '</span><span class="rank-name">' + pseudo + (tie ? ' <span class="rank-tie">ex æquos</span>' : '') + '</span><span class="pts">' + points + ' pt' + (points > 1 ? 's' : '') + '</span></li>';
 }
 /* Classement calculé à partir de points cumulés (classement général, par
    jeu agrégé sur une saison...) : positions "à la compétition" (une égalité
@@ -2532,7 +2558,7 @@ function renderRankingHTML(ranking){
   const sorted = ranking.slice().sort((a,b) => a.position - b.position);
   const counts = {};
   sorted.forEach(r => { counts[r.position] = (counts[r.position] || 0) + 1; });
-  return '<ol class="rank-list">' + sorted.map(r => rankRowHTML(r.position, r.pseudo, r.points, counts[r.position] > 1)).join('') + '</ol>';
+  return '<ol class="rank-list">' + sorted.map(r => rankRowHTML(r.position, r.pseudo, r.points, counts[r.position] > 1, r.email)).join('') + '</ol>';
 }
 /* ---------- Bannière "vainqueur" d'une arène terminée (Round 36) : réutilise le classement général déjà calculé ---------- */
 function renderArenaWinnerBanner(elId, rankedList, isArchived){
@@ -2994,7 +3020,7 @@ function renderGeneralRanking(){
     return;
   }
   const ranked = rankListWithTies(withPoints.slice(0,10), 'points');
-  body.innerHTML = '<ol class="rank-list">' + ranked.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie)).join('') + '</ol>';
+  body.innerHTML = '<ol class="rank-list">' + ranked.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie, r.item.email)).join('') + '</ol>';
   renderArenaWinnerBanner('gx262-winner-banner', ranked, gx262IsArchived);
 }
 
@@ -3073,9 +3099,11 @@ function computeSeasonAggregates(seasonNum){
 }
 
 function renderLeaderboardRows(list){
+  const ranks = rankListWithTies(list, 'totalPoints');
   return list.map((p, i) => {
-    const rankClass = i < 3 ? ' top3' : '';
-    return '<div class="leaderboard-row' + rankClass + '" data-email="' + p.email + '"><span class="leaderboard-rank">' + (i+1) + '</span><span class="leaderboard-avatar" style="background:' + avatarBg(p.avatar) + '">' + avatarInnerHTML(p.avatar) + '</span><span class="leaderboard-name">' + p.pseudo + '</span><span class="leaderboard-meta">' + p.arenas + ' arène' + (p.arenas>1?'s':'') + '</span><span class="leaderboard-points">' + p.totalPoints + ' pt' + (p.totalPoints>1?'s':'') + '</span></div>';
+    const pos = ranks[i].position;
+    const rankClass = pos <= 3 ? ' top3' : '';
+    return '<div class="leaderboard-row' + rankClass + (ranks[i].tie ? ' tie' : '') + '" data-email="' + p.email + '"><span class="leaderboard-rank">' + pos + '</span><span class="leaderboard-avatar" style="background:' + avatarBg(p.avatar) + '">' + avatarInnerHTML(p.avatar) + '</span><span class="leaderboard-name">' + p.pseudo + '</span><span class="leaderboard-meta">' + p.arenas + ' arène' + (p.arenas>1?'s':'') + '</span><span class="leaderboard-points">' + p.totalPoints + ' pt' + (p.totalPoints>1?'s':'') + '</span></div>';
   }).join('');
 }
 
@@ -3141,7 +3169,7 @@ function renderSeasonGameAggregates(seasonNum){
   el.innerHTML = games.map(g => {
     const ranked = rankListWithTies(g.ranking, 'points');
     return '<div class="rank-card"><span class="lock">' + stripIcon(g.icon) + '</span><h3>' + g.name + '</h3><div class="rank-status">' +
-      '<ol class="rank-list">' + ranked.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie)).join('') + '</ol>' +
+      '<ol class="rank-list">' + ranked.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie, r.item.email)).join('') + '</ol>' +
     '</div></div>';
   }).join('');
 }
@@ -3205,7 +3233,7 @@ function renderArenaRankingBody(){
     return;
   }
   const ranked = rankListWithTies(list, 'points');
-  communityArenaRankingBodyEl.innerHTML = '<ol class="rank-list">' + ranked.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie)).join('') + '</ol>';
+  communityArenaRankingBodyEl.innerHTML = '<ol class="rank-list">' + ranked.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie, r.item.email)).join('') + '</ol>';
 }
 function renderArenaRankingTabs(){
   if(!communityArenaTabsEl || !communityArenaRankingBodyEl) return;
@@ -3416,6 +3444,142 @@ const memberProfileBackdrop = document.getElementById('member-profile-backdrop')
 function closeMemberProfile(){ if(memberProfileModal) memberProfileModal.classList.add('hidden'); }
 if(memberProfileClose) memberProfileClose.addEventListener('click', closeMemberProfile);
 if(memberProfileBackdrop) memberProfileBackdrop.addEventListener('click', closeMemberProfile);
+
+/* ---------- Fiche profil au survol d'un pseudo (Round 41) ----------
+   Survoler un pseudo dans un classement (n'importe lequel) ou dans la liste
+   des membres affiche une mini-fiche. Tout est calculé à partir des données
+   déjà chargées (inscriptions approuvées, résultats) : aucune lecture
+   Firestore en plus, sauf le profil "users" (prénom, âge, jeu favori) lu une
+   seule fois par membre et mis en cache, et seulement si on est connecté
+   (les règles de sécurité réservent ces profils aux membres connectés).
+   Sur mobile (pas de survol), le clic ouvre toujours la fiche complète. */
+const gxHoverProfileCache = {};
+let gxHoverCardEl = null;
+let gxHoverTimer = null;
+let gxHoverTarget = null;
+function gxHoverCard(){
+  if(!gxHoverCardEl){
+    gxHoverCardEl = document.createElement('div');
+    gxHoverCardEl.className = 'gx-hovercard';
+    gxHoverCardEl.setAttribute('role', 'tooltip');
+    document.body.appendChild(gxHoverCardEl);
+  }
+  return gxHoverCardEl;
+}
+function gxMemberStats(email){
+  const mine = lastApprovedRegDocs.filter(r => r.email === email);
+  const last = mine[mine.length - 1] || {};
+  // Place dans chaque arène jouée (ex æquo partagés), victoires, meilleure place.
+  let wins = 0, best = null;
+  mine.forEach(r => {
+    const arenaRows = lastApprovedRegDocs.filter(x => x.kermesseId === r.kermesseId && (x.points || 0) > 0)
+      .sort((a,b) => (b.points || 0) - (a.points || 0));
+    if(!(r.points > 0)) return;
+    const ranked = rankListWithTies(arenaRows, 'points');
+    const me = ranked.find(x => x.item.email === email);
+    if(!me) return;
+    if(me.position === 1) wins += 1;
+    if(best === null || me.position < best) best = me.position;
+  });
+  const rankIn = (season) => {
+    const list = computeSeasonAggregates(season).filter(p => p.totalPoints > 0);
+    const ranked = rankListWithTies(list, 'totalPoints');
+    const me = ranked.find(x => x.item.email === email);
+    return me ? { position: me.position, tie: me.tie, points: me.item.totalPoints } : null;
+  };
+  return {
+    pseudo: last.pseudo || email.split('@')[0],
+    avatar: last.avatar || null,
+    arenas: mine.length,
+    wins: wins,
+    best: best,
+    season: rankIn(currentSeasonNumber),
+    global: rankIn('global'),
+    favGame: computeFavoriteGame(email)
+  };
+}
+function gxHoverCardHTML(email, extra){
+  const s = gxMemberStats(email);
+  const sub = [];
+  if(extra && extra.prenom) sub.push(extra.prenom);
+  if(extra && extra.age) sub.push(extra.age + ' ans');
+  let html = '<div class="gx-hovercard-head"><span class="gx-hovercard-avatar" style="background:' + avatarBg(s.avatar) + '">' + avatarInnerHTML(s.avatar) + '</span><div><div class="gx-hovercard-name">' + s.pseudo + '</div>' +
+    (sub.length ? '<div class="gx-hovercard-sub">' + sub.join(' · ') + '</div>' : '') + '</div></div>';
+  const rankTxt = (r) => r ? ('#' + r.position + (r.tie ? ' (ex æquo)' : '')) : '—';
+  html += '<div class="gx-hovercard-stats">' +
+    '<div class="gx-hovercard-stat"><b>' + (s.season ? ('#' + s.season.position) : '—') + '</b><span>Saison ' + currentSeasonNumber + (s.season && s.season.tie ? ' · ex æquo' : '') + '</span></div>' +
+    '<div class="gx-hovercard-stat"><b>' + s.arenas + '</b><span>Arène' + (s.arenas > 1 ? 's' : '') + '</span></div>' +
+    '<div class="gx-hovercard-stat"><b>' + s.wins + '</b><span>Victoire' + (s.wins > 1 ? 's' : '') + '</span></div>' +
+  '</div>';
+  if(s.global) html += '<div class="gx-hovercard-row"><strong>Toutes saisons :</strong> ' + rankTxt(s.global) + ' · ' + s.global.points + ' pt' + (s.global.points > 1 ? 's' : '') + '</div>';
+  if(s.best) html += '<div class="gx-hovercard-row"><strong>Meilleure place en arène :</strong> ' + ordinalLabel(s.best) + '</div>';
+  if(s.favGame) html += '<div class="gx-hovercard-row"><strong>Performe le mieux sur :</strong> ' + s.favGame.icon + ' ' + s.favGame.name + '</div>';
+  if(extra && extra.standFavori){
+    const g = (window.__gxGames || []).find(g => g.slug === extra.standFavori);
+    html += '<div class="gx-hovercard-row"><strong>Jeu favori :</strong> ' + (g ? (stripIcon(g.icon) + ' ' + g.name) : extra.standFavori) + '</div>';
+  }
+  html += '<div class="gx-hovercard-foot">' + (currentAuthEmail ? 'Clique pour voir le profil complet' : 'Connecte-toi pour voir le profil complet') + '</div>';
+  return html;
+}
+function gxPlaceHoverCard(target){
+  const card = gxHoverCard();
+  const r = target.getBoundingClientRect();
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  let left = Math.min(Math.max(12, r.left), window.innerWidth - cw - 12);
+  let top = r.bottom + 8;
+  if(top + ch > window.innerHeight - 12) top = Math.max(12, r.top - ch - 8);
+  card.style.left = left + 'px';
+  card.style.top = top + 'px';
+}
+async function gxShowHoverCard(target){
+  const email = target.getAttribute('data-email');
+  if(!email) return;
+  const card = gxHoverCard();
+  card.innerHTML = gxHoverCardHTML(email, gxHoverProfileCache[email]);
+  gxPlaceHoverCard(target);
+  card.classList.add('visible');
+  if(currentAuthEmail && gxHoverProfileCache[email] === undefined){
+    gxHoverProfileCache[email] = null;
+    try {
+      const snap = await getDoc(doc(db, 'users', sanitizeEmail(email)));
+      gxHoverProfileCache[email] = snap.exists() ? snap.data() : {};
+    } catch(e) { gxHoverProfileCache[email] = {}; }
+    if(gxHoverTarget === target){
+      card.innerHTML = gxHoverCardHTML(email, gxHoverProfileCache[email]);
+      gxPlaceHoverCard(target);
+    }
+  }
+}
+function gxHideHoverCard(){
+  clearTimeout(gxHoverTimer);
+  gxHoverTarget = null;
+  if(gxHoverCardEl) gxHoverCardEl.classList.remove('visible');
+}
+const GX_HOVER_SELECTOR = '.rank-list li[data-email], .leaderboard-row[data-email], .participant-chip[data-email]';
+if(window.matchMedia && window.matchMedia('(hover: hover)').matches){
+  document.addEventListener('mouseover', (e) => {
+    const target = e.target.closest(GX_HOVER_SELECTOR);
+    if(!target || target === gxHoverTarget) return;
+    clearTimeout(gxHoverTimer);
+    gxHoverTarget = target;
+    gxHoverTimer = setTimeout(() => { if(gxHoverTarget === target) gxShowHoverCard(target); }, 220);
+  });
+  document.addEventListener('mouseout', (e) => {
+    const from = e.target.closest(GX_HOVER_SELECTOR);
+    if(!from) return;
+    if(e.relatedTarget && from.contains(e.relatedTarget)) return;
+    gxHideHoverCard();
+  });
+  window.addEventListener('scroll', gxHideHoverCard, { passive: true });
+}
+/* Clic sur une ligne de n'importe quel classement : fiche complète (comme
+   déjà le cas pour le classement général et la liste des membres). */
+document.addEventListener('click', (e) => {
+  const li = e.target.closest('.rank-list li[data-email]');
+  if(!li) return;
+  gxHideHoverCard();
+  openMemberProfile(li.getAttribute('data-email'));
+});
 /* ---------- Archives GALACTIX : affichage public + gestion admin (Round 15, page VOD Round 34) ---------- */
 /* ---------- Lecteur VOD intégré directement sur le site, plutôt qu'un lien externe (Round 36) ---------- */
 function vodEmbedHtml(url){
@@ -4263,7 +4427,7 @@ async function renderDynamicArenaPage(kermesseId){
           renderArenaWinnerBanner('dynamic-winner-banner', [], isArchived);
         } else {
           const rankedDyn = rankListWithTies(withPointsDyn.slice(0,10), 'points');
-          genEl.innerHTML = '<ol class="rank-list">' + rankedDyn.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie)).join('') + '</ol>';
+          genEl.innerHTML = '<ol class="rank-list">' + rankedDyn.map(r => rankRowHTML(r.position, r.item.pseudo, r.item.points, r.tie, r.item.email)).join('') + '</ol>';
           renderArenaWinnerBanner('dynamic-winner-banner', rankedDyn, isArchived);
         }
       }
