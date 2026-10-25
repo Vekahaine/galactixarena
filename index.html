@@ -404,6 +404,47 @@ nav .links a:hover{color:var(--yellow);}
 }
 .leaderboard-row,.participant-chip{cursor:pointer;transition:transform .15s ease,border-color .15s ease;}
 .leaderboard-row:hover,.participant-chip:hover{border-color:rgba(247,241,225,0.35);transform:translateY(-1px);}
+/* ---------- Profils enrichis (Round 42) ---------- */
+.gx-badges{display:flex;flex-wrap:wrap;gap:8px;}
+.gx-badge{display:inline-flex;align-items:center;gap:6px;background:var(--night-3);border:1px solid rgba(244,196,48,0.3);border-radius:999px;padding:5px 12px;font-family:'Fredoka';font-weight:600;font-size:0.82rem;color:var(--cream);cursor:help;}
+.gx-badges-empty,.gx-chart-empty{font-size:0.82rem;color:var(--cream-dim);}
+.gx-badges-compact{display:flex;flex-wrap:wrap;gap:4px;margin:-4px 0 10px;font-size:1.05rem;}
+.gx-hovercard-bio{font-size:0.8rem;color:var(--cream-dim);font-style:italic;margin-bottom:10px;}
+.gx-profile-bio{font-style:italic;color:var(--cream);border-left:3px solid var(--yellow);padding:4px 0 4px 12px;margin:-6px 0 14px;font-size:0.92rem;}
+.gx-profile-infos{display:flex;flex-direction:column;gap:6px;font-size:0.86rem;color:var(--cream-dim);margin-bottom:14px;}
+.gx-profile-infos b{color:var(--cream);font-weight:600;}
+.gx-chart{width:100%;height:auto;display:block;}
+.gx-chart-grid{stroke:rgba(247,241,225,0.08);stroke-width:1;}
+.gx-chart-axis{fill:var(--cream-dim);font-size:10px;font-family:'Space Grotesk';}
+.gx-chart-line{fill:none;stroke:var(--teal);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;}
+.gx-chart-dot{fill:var(--night-2);stroke:var(--teal);stroke-width:2.5;}
+.gx-chart-dot.gold{stroke:var(--yellow);fill:var(--yellow);}
+.gx-bars{display:flex;flex-direction:column;gap:8px;}
+.gx-bar-row{display:grid;grid-template-columns:minmax(0,40%) 1fr auto;align-items:center;gap:10px;font-size:0.82rem;}
+.gx-bar-label{color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gx-bar-track{height:10px;background:var(--night-3);border-radius:999px;overflow:hidden;}
+.gx-bar-fill{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--yellow));border-radius:999px;}
+.gx-bar-val{font-family:'Fredoka';font-weight:700;color:var(--yellow);min-width:28px;text-align:right;}
+.gx-h2h-pick{font-size:0.85rem;color:var(--cream-dim);margin-bottom:12px;}
+.gx-h2h-pick select{background:var(--night-3);color:var(--cream);border:1px solid rgba(247,241,225,0.15);border-radius:8px;padding:5px 8px;font-family:'Space Grotesk';margin-left:6px;max-width:60%;}
+.gx-h2h-head{display:flex;justify-content:space-between;font-family:'Fredoka';font-weight:700;color:var(--cream);margin-bottom:8px;}
+.gx-h2h-head span:nth-child(2){color:var(--cream-dim);font-weight:500;}
+.gx-h2h-row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin-bottom:10px;font-size:0.82rem;color:var(--cream-dim);}
+.gx-h2h-score{color:var(--cream);}
+.gx-h2h-score b{font-family:'Fredoka';color:var(--yellow);font-size:1rem;}
+.gx-h2h-bar{grid-column:1 / -1;display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--night-3);}
+.gx-h2h-bar .a{background:var(--yellow);} .gx-h2h-bar .eq{background:rgba(247,241,225,0.25);} .gx-h2h-bar .b{background:var(--violet);}
+.gx-h2h-verdict{font-family:'Fredoka';font-weight:600;color:var(--cream);font-size:0.9rem;margin-top:4px;}
+.gx-customize{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.gx-customize label{font-size:0.8rem;color:var(--cream-dim);margin-top:6px;}
+.gx-customize textarea,.gx-customize input{background:var(--night-2);color:var(--cream);border:1px solid rgba(247,241,225,0.15);border-radius:10px;padding:10px 12px;font-family:'Space Grotesk';font-size:0.9rem;resize:vertical;}
+.gx-swatches{display:flex;flex-wrap:wrap;gap:8px;}
+.gx-swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;}
+.gx-swatch.none{background:var(--night-3);color:var(--cream-dim);font-size:0.8rem;}
+.gx-swatch.active{border-color:var(--cream);box-shadow:0 0 0 2px var(--night-2) inset;}
+.gx-game-picks{display:flex;flex-wrap:wrap;gap:8px;}
+.gx-game-pick{background:var(--night-3);color:var(--cream);border:1px solid rgba(247,241,225,0.15);border-radius:999px;padding:6px 12px;font-family:'Fredoka';font-weight:600;font-size:0.82rem;cursor:pointer;}
+.gx-game-pick.active{border-color:var(--yellow);background:rgba(244,196,48,0.15);}
 /* ---------- Fiche profil au survol d'un pseudo (Round 41) ---------- */
 .rank-list li[data-email]{cursor:pointer;transition:border-color .15s ease;}
 .rank-list li[data-email]:hover{border-color:rgba(247,241,225,0.35);}
@@ -1100,6 +1141,17 @@ nav .brand:hover{opacity:0.82;}
         <input type="text" id="profile-prenom" placeholder="Prénom">
         <input type="number" id="profile-age" placeholder="Âge" min="0" max="120">
         <select id="profile-stand-favori"><option value="">Jeu favori — aucun</option></select>
+      </div>
+      <h3>Personnalise ton profil</h3>
+      <div class="gx-customize">
+        <label for="profile-bio">Ta phrase (affichée sur ton profil, 140 caractères max)</label>
+        <textarea id="profile-bio" maxlength="140" rows="2" placeholder="ex. Le roi incontesté de Worms 💣"></textarea>
+        <label for="profile-discord">Ton pseudo Discord (facultatif)</label>
+        <input type="text" id="profile-discord" maxlength="40" placeholder="ex. VkN">
+        <label>Couleur de ta fiche</label>
+        <div class="gx-swatches" id="profile-color-swatches"></div>
+        <label>Les jeux que tu préfères (3 max)</label>
+        <div class="gx-game-picks" id="profile-jeux-preferes"></div>
       </div>
       <button class="btn btn-ghost" type="button" id="profile-extra-save-btn">Enregistrer mes infos</button>
       <div class="account-msg" id="profile-extra-msg"></div>
@@ -2442,6 +2494,7 @@ onAuthStateChanged(auth, (user) => {
     if(profileAgeEl) profileAgeEl.value = (data.age != null) ? data.age : '';
     if(typeof renderStandFavoriOptions === 'function') renderStandFavoriOptions();
     if(profileStandFavoriEl) profileStandFavoriEl.value = data.standFavori || '';
+    gxRenderCustomizeForm(data);
   });
 
   if(navNotifEl) navNotifEl.classList.remove('hidden');
@@ -3418,6 +3471,7 @@ async function openMemberProfile(email){
     html += '<div class="member-profile-row"><strong>Jeu où il performe le mieux :</strong> ' + favGame.icon + ' ' + favGame.name + '</div>';
   }
   html += '<div class="member-profile-row"><strong>Classement général GALACTIX ARENA :</strong> ' + (rank ? ('#' + rank) : '—') + ' (' + totalPoints + ' pt' + (totalPoints > 1 ? 's' : '') + ')</div>';
+  html += gxProfileExtraSectionsHTML(email, extra);
   html += '<div class="member-profile-palmares"><h4>Palmarès</h4>';
   if(palmares.length === 0){
     html += '<div class="admin-empty">Aucune arène pour l\'instant.</div>';
@@ -3428,6 +3482,9 @@ async function openMemberProfile(email){
   }
   html += '</div>';
   content.innerHTML = html;
+  const card = content.closest('.member-profile-card');
+  const accent = gxProfileColor(extra.couleurProfil);
+  if(card) card.style.borderTop = accent ? ('5px solid ' + accent) : '';
 }
 
 function handleMemberRowClick(e){
@@ -3505,6 +3562,8 @@ function gxHoverCardHTML(email, extra){
   if(extra && extra.age) sub.push(extra.age + ' ans');
   let html = '<div class="gx-hovercard-head"><span class="gx-hovercard-avatar" style="background:' + avatarBg(s.avatar) + '">' + avatarInnerHTML(s.avatar) + '</span><div><div class="gx-hovercard-name">' + s.pseudo + '</div>' +
     (sub.length ? '<div class="gx-hovercard-sub">' + sub.join(' · ') + '</div>' : '') + '</div></div>';
+  html += gxBadgesHTML(gxComputeBadges(email), true);
+  if(extra && extra.bio) html += '<div class="gx-hovercard-bio">« ' + gxEsc(extra.bio) + ' »</div>';
   const rankTxt = (r) => r ? ('#' + r.position + (r.tie ? ' (ex æquo)' : '')) : '—';
   html += '<div class="gx-hovercard-stats">' +
     '<div class="gx-hovercard-stat"><b>' + (s.season ? ('#' + s.season.position) : '—') + '</b><span>Saison ' + currentSeasonNumber + (s.season && s.season.tie ? ' · ex æquo' : '') + '</span></div>' +
@@ -3536,6 +3595,8 @@ async function gxShowHoverCard(target){
   if(!email) return;
   const card = gxHoverCard();
   card.innerHTML = gxHoverCardHTML(email, gxHoverProfileCache[email]);
+  const accent0 = gxProfileColor(gxHoverProfileCache[email] && gxHoverProfileCache[email].couleurProfil);
+  card.style.borderTop = accent0 ? ('4px solid ' + accent0) : '';
   gxPlaceHoverCard(target);
   card.classList.add('visible');
   if(currentAuthEmail && gxHoverProfileCache[email] === undefined){
@@ -3546,6 +3607,8 @@ async function gxShowHoverCard(target){
     } catch(e) { gxHoverProfileCache[email] = {}; }
     if(gxHoverTarget === target){
       card.innerHTML = gxHoverCardHTML(email, gxHoverProfileCache[email]);
+      const accent1 = gxProfileColor(gxHoverProfileCache[email] && gxHoverProfileCache[email].couleurProfil);
+      card.style.borderTop = accent1 ? ('4px solid ' + accent1) : '';
       gxPlaceHoverCard(target);
     }
   }
@@ -3580,6 +3643,256 @@ document.addEventListener('click', (e) => {
   gxHideHoverCard();
   openMemberProfile(li.getAttribute('data-email'));
 });
+/* ---------- Profils enrichis (Round 42) : badges automatiques, stats visuelles,
+   rivalités, personnalisation. Tout est calculé à partir des données déjà
+   chargées (inscriptions approuvées, résultats, arènes) — aucune nouvelle
+   collection Firestore, aucune règle de sécurité à changer. ---------- */
+const GX_PROFILE_COLORS = [
+  { id: 'or', label: 'Or', hex: '#F4C430' }, { id: 'rouge', label: 'Rouge', hex: '#E8483B' },
+  { id: 'turquoise', label: 'Turquoise', hex: '#2FBF9F' }, { id: 'violet', label: 'Violet', hex: '#8B6FF2' },
+  { id: 'bleu', label: 'Bleu', hex: '#4FA3F7' }, { id: 'rose', label: 'Rose', hex: '#F28AC1' },
+  { id: 'vert', label: 'Vert', hex: '#9BD45B' }, { id: 'orange', label: 'Orange', hex: '#F29A4A' }
+];
+function gxProfileColor(id){ const c = GX_PROFILE_COLORS.find(c => c.id === id); return c ? c.hex : null; }
+function gxEsc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch])); }
+
+/* Arènes dans l'ordre chronologique (1er jour, sinon date de création). */
+function gxArenasChrono(){
+  const ids = Object.keys(arenaSeasonById || {});
+  const key = (a, id) => {
+    const d = a && Array.isArray(a.days) && a.days[0] && a.days[0].date;
+    if(d) return String(d);
+    const c = a && a.createdAt && (a.createdAt.seconds || a.createdAt._seconds);
+    return c ? new Date(c * 1000).toISOString().slice(0, 10) : ('~' + id);
+  };
+  return ids.map(id => ({ id, a: getArenaById(id) })).filter(x => x.a)
+    .sort((x, y) => key(x.a, x.id).localeCompare(key(y.a, y.id)) || x.id.localeCompare(y.id));
+}
+function gxArenaShortName(id){ const a = getArenaById(id); return (a && (a.shortName || a.name)) || id; }
+
+/* Place de chaque inscrit dans une arène (ex æquo partagés). */
+function gxArenaPlacements(kermesseId){
+  const rows = lastApprovedRegDocs.filter(r => r.kermesseId === kermesseId && (r.points || 0) > 0)
+    .sort((a, b) => (b.points || 0) - (a.points || 0));
+  const ranked = rankListWithTies(rows, 'points');
+  const map = {};
+  ranked.forEach(r => { map[r.item.email] = { position: r.position, tie: r.tie, points: r.item.points || 0 }; });
+  return map;
+}
+
+/* Historique arène par arène d'un membre (pour la courbe). */
+function gxMemberHistory(email){
+  return gxArenasChrono().map(({ id, a }) => {
+    const p = gxArenaPlacements(id)[email];
+    if(!p) return null;
+    return { id, name: gxArenaShortName(id), position: p.position, tie: p.tie, points: p.points, archived: a.status === 'archived' };
+  }).filter(Boolean);
+}
+
+/* Points cumulés par jeu (pour les barres). */
+function gxMemberPointsByGame(email){
+  const by = {};
+  allResultsDocs.forEach(r => {
+    const row = (r.ranking || []).find(x => x.email === email);
+    if(!row) return;
+    const arena = getArenaById(r.kermesseId);
+    const entries = arena ? normalizeArenaGames(arena.games) : [];
+    const entry = entries.find(e => e.id === r.gameSlug) || { slug: r.gameSlug, name: r.gameName || r.gameSlug, icon: '🎮' };
+    if(!by[entry.slug]) by[entry.slug] = { name: entry.name, icon: stripIcon(entry.icon || '🎮'), points: 0, played: 0, wins: 0 };
+    by[entry.slug].points += (row.points || 0);
+    by[entry.slug].played += 1;
+    if(row.position === 1) by[entry.slug].wins += 1;
+  });
+  return Object.values(by).sort((a, b) => b.points - a.points);
+}
+
+/* Badges automatiques. */
+function gxComputeBadges(email){
+  const badges = [];
+  const hist = gxMemberHistory(email);
+  const played = hist.length;
+  const finished = hist.filter(h => h.archived);
+  const wins = finished.filter(h => h.position === 1 && !h.tie).length;
+  const coWins = finished.filter(h => h.position === 1 && h.tie).length;
+  const podiums = finished.filter(h => h.position <= 3).length;
+  if(wins) badges.push({ icon: '🏆', label: 'Vainqueur d\'arène' + (wins > 1 ? ' ×' + wins : ''), desc: 'A remporté ' + wins + ' arène' + (wins > 1 ? 's' : '') + ' seul en tête' });
+  if(coWins) badges.push({ icon: '🤝', label: 'Co-vainqueur' + (coWins > 1 ? ' ×' + coWins : ''), desc: 'A fini 1er ex æquo d\'une arène' });
+  if(podiums) badges.push({ icon: '🥉', label: 'Podium' + (podiums > 1 ? ' ×' + podiums : ''), desc: 'Top 3 d\'une arène terminée' });
+  // Champion de saison : 1er d'une saison TERMINÉE (saison antérieure à la saison en cours).
+  for(let s = 1; s < currentSeasonNumber; s++){
+    const list = computeSeasonAggregates(s).filter(p => p.totalPoints > 0);
+    const ranked = rankListWithTies(list, 'totalPoints');
+    const me = ranked.find(x => x.item.email === email);
+    if(me && me.position === 1) badges.push({ icon: '👑', label: 'Champion saison ' + s, desc: '1er du classement général de la saison ' + s + (me.tie ? ' (ex æquo)' : '') });
+  }
+  if(played >= 10) badges.push({ icon: '💎', label: 'Légende', desc: '10 arènes jouées ou plus' });
+  else if(played >= 5) badges.push({ icon: '🎖️', label: 'Vétéran', desc: '5 arènes jouées ou plus' });
+  else if(played >= 1) badges.push({ icon: '🌱', label: 'Recrue', desc: 'A joué sa première arène' });
+  // Fidèle : 3 arènes de suite (dans l'ordre chronologique de toutes les arènes terminées).
+  const allFinished = gxArenasChrono().filter(x => x.a.status === 'archived').map(x => x.id);
+  const mine = new Set(hist.map(h => h.id));
+  let streak = 0, bestStreak = 0;
+  allFinished.forEach(id => { streak = mine.has(id) ? streak + 1 : 0; bestStreak = Math.max(bestStreak, streak); });
+  if(bestStreak >= 3) badges.push({ icon: '🔥', label: 'Fidèle', desc: bestStreak + ' arènes d\'affilée' });
+  const games = gxMemberPointsByGame(email);
+  games.filter(g => g.wins >= 2).slice(0, 2).forEach(g => badges.push({ icon: '🎯', label: 'Spécialiste ' + g.name, desc: g.wins + ' victoires sur ' + g.name }));
+  const scored = games.filter(g => g.points > 0).length;
+  if(scored >= 5) badges.push({ icon: '⚡', label: 'Polyvalent', desc: 'A marqué des points sur ' + scored + ' jeux différents' });
+  return badges;
+}
+function gxBadgesHTML(badges, compact){
+  if(!badges.length) return compact ? '' : '<div class="gx-badges-empty">Pas encore de badge — ils se débloquent tout seuls en jouant les arènes.</div>';
+  if(compact) return '<div class="gx-badges-compact">' + badges.map(b => '<span title="' + gxEsc(b.label + ' — ' + b.desc) + '">' + b.icon + '</span>').join('') + '</div>';
+  return '<div class="gx-badges">' + badges.map(b => '<span class="gx-badge" title="' + gxEsc(b.desc) + '"><span>' + b.icon + '</span>' + gxEsc(b.label) + '</span>').join('') + '</div>';
+}
+
+/* Courbe : place arène par arène (1er en haut). */
+function gxHistoryChartHTML(hist){
+  if(hist.length < 2){
+    if(hist.length === 1) return '<div class="gx-chart-empty">Une seule arène jouée pour l\'instant (' + gxEsc(hist[0].name) + ' : ' + ordinalLabel(hist[0].position) + '). La courbe apparaîtra dès la 2e arène.</div>';
+    return '<div class="gx-chart-empty">Aucune arène jouée pour l\'instant.</div>';
+  }
+  const W = 360, H = 150, padL = 36, padR = 20, padT = 16, padB = 30;
+  const maxPos = Math.max(3, ...hist.map(h => h.position));
+  const x = i => padL + i * ((W - padL - padR) / (hist.length - 1));
+  const y = p => padT + (p - 1) * ((H - padT - padB) / (maxPos - 1));
+  const pts = hist.map((h, i) => x(i).toFixed(1) + ',' + y(h.position).toFixed(1)).join(' ');
+  let svg = '<svg class="gx-chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Place arène par arène">';
+  [1, Math.ceil(maxPos / 2), maxPos].filter((v, i, a) => a.indexOf(v) === i).forEach(p => {
+    svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(p) + '" y2="' + y(p) + '" class="gx-chart-grid"/><text x="' + (padL - 6) + '" y="' + (y(p) + 4) + '" text-anchor="end" class="gx-chart-axis">' + ordinalLabel(p) + '</text>';
+  });
+  svg += '<polyline points="' + pts + '" class="gx-chart-line"/>';
+  hist.forEach((h, i) => {
+    svg += '<circle cx="' + x(i) + '" cy="' + y(h.position) + '" r="5" class="gx-chart-dot' + (h.position === 1 ? ' gold' : '') + '"><title>' + gxEsc(h.name) + ' : ' + ordinalLabel(h.position) + (h.tie ? ' (ex æquo)' : '') + ' — ' + h.points + ' pts</title></circle>';
+    const anchor = i === 0 ? 'start' : (i === hist.length - 1 ? 'end' : 'middle');
+    svg += '<text x="' + (i === 0 ? x(i) - 6 : i === hist.length - 1 ? x(i) + 6 : x(i)) + '" y="' + (H - 10) + '" text-anchor="' + anchor + '" class="gx-chart-axis">' + gxEsc(h.name.length > 10 ? h.name.slice(0, 9) + '…' : h.name) + '</text>';
+  });
+  return svg + '</svg>';
+}
+function gxGameBarsHTML(games){
+  const list = games.filter(g => g.points > 0).slice(0, 6);
+  if(!list.length) return '<div class="gx-chart-empty">Aucun point marqué pour l\'instant.</div>';
+  const max = list[0].points;
+  return '<div class="gx-bars">' + list.map(g =>
+    '<div class="gx-bar-row"><span class="gx-bar-label">' + g.icon + ' ' + gxEsc(g.name) + '</span><span class="gx-bar-track"><span class="gx-bar-fill" style="width:' + Math.max(6, Math.round(g.points / max * 100)) + '%"></span></span><span class="gx-bar-val">' + g.points + '</span></div>'
+  ).join('') + '</div>';
+}
+
+/* Rivalité : face-à-face entre deux membres sur tout ce qu'ils ont joué ensemble. */
+function gxHeadToHead(a, b){
+  const res = { arenas: { a: 0, b: 0, eq: 0 }, games: { a: 0, b: 0, eq: 0 } };
+  gxArenasChrono().forEach(({ id }) => {
+    const pl = gxArenaPlacements(id);
+    if(!pl[a] || !pl[b]) return;
+    if(pl[a].position < pl[b].position) res.arenas.a++; else if(pl[b].position < pl[a].position) res.arenas.b++; else res.arenas.eq++;
+  });
+  allResultsDocs.forEach(r => {
+    const ra = (r.ranking || []).find(x => x.email === a), rb = (r.ranking || []).find(x => x.email === b);
+    if(!ra || !rb) return;
+    if(ra.position < rb.position) res.games.a++; else if(rb.position < ra.position) res.games.b++; else res.games.eq++;
+  });
+  return res;
+}
+function gxMemberDirectory(){
+  const by = {};
+  lastApprovedRegDocs.forEach(r => { if(r.email) by[r.email] = { email: r.email, pseudo: r.pseudo || r.email }; });
+  return Object.values(by).sort((x, y) => x.pseudo.localeCompare(y.pseudo));
+}
+function gxPseudoOf(email){ const m = gxMemberDirectory().find(x => x.email === email); return m ? m.pseudo : email; }
+function gxRivalryHTML(a, b){
+  const h = gxHeadToHead(a, b);
+  const total = h.arenas.a + h.arenas.b + h.arenas.eq + h.games.a + h.games.b + h.games.eq;
+  if(!total) return '<div class="gx-chart-empty">Ils ne se sont encore jamais affrontés (aucune arène ni aucun jeu en commun).</div>';
+  const line = (label, s) => {
+    const n = s.a + s.b + s.eq;
+    if(!n) return '';
+    return '<div class="gx-h2h-row"><span class="gx-h2h-label">' + label + '</span><span class="gx-h2h-score"><b>' + s.a + '</b> – <b>' + s.b + '</b>' + (s.eq ? ' <small>(' + s.eq + ' égalité' + (s.eq > 1 ? 's' : '') + ')</small>' : '') + '</span>' +
+      '<span class="gx-h2h-bar"><span style="width:' + Math.round(s.a / n * 100) + '%" class="a"></span><span style="width:' + Math.round(s.eq / n * 100) + '%" class="eq"></span><span style="width:' + Math.round(s.b / n * 100) + '%" class="b"></span></span></div>';
+  };
+  const ta = h.arenas.a + h.games.a, tb = h.arenas.b + h.games.b;
+  const verdict = ta === tb ? 'Parfaite égalité pour l\'instant 🤝' : ((ta > tb ? gxEsc(gxPseudoOf(a)) : gxEsc(gxPseudoOf(b))) + ' mène le face-à-face 🔥');
+  return '<div class="gx-h2h-head"><span>' + gxEsc(gxPseudoOf(a)) + '</span><span>vs</span><span>' + gxEsc(gxPseudoOf(b)) + '</span></div>' +
+    line('Arènes (qui finit devant)', h.arenas) + line('Jeux (qui finit devant)', h.games) + '<div class="gx-h2h-verdict">' + verdict + '</div>';
+}
+
+/* Sections ajoutées à la fiche complète d'un membre. */
+function gxProfileExtraSectionsHTML(email, extra){
+  let html = '';
+  const color = gxProfileColor(extra && extra.couleurProfil);
+  if(extra && extra.bio) html += '<div class="gx-profile-bio"' + (color ? ' style="border-color:' + color + '"' : '') + '>« ' + gxEsc(extra.bio) + ' »</div>';
+  const infos = [];
+  if(extra && extra.discord) infos.push('<span>💬 Discord : <b>' + gxEsc(extra.discord) + '</b></span>');
+  if(extra && Array.isArray(extra.jeuxPreferes) && extra.jeuxPreferes.length){
+    const names = extra.jeuxPreferes.map(slug => { const g = (window.__gxGames || []).find(g => g.slug === slug); return g ? (stripIcon(g.icon) + ' ' + g.name) : slug; });
+    infos.push('<span>❤️ Aime jouer à : <b>' + names.map(gxEsc).join(', ') + '</b></span>');
+  }
+  if(infos.length) html += '<div class="gx-profile-infos">' + infos.join('') + '</div>';
+  html += '<div class="member-profile-palmares"><h4>Badges</h4>' + gxBadgesHTML(gxComputeBadges(email), false) + '</div>';
+  html += '<div class="member-profile-palmares"><h4>Évolution arène par arène</h4>' + gxHistoryChartHTML(gxMemberHistory(email)) + '</div>';
+  html += '<div class="member-profile-palmares"><h4>Points par jeu</h4>' + gxGameBarsHTML(gxMemberPointsByGame(email)) + '</div>';
+  const others = gxMemberDirectory().filter(m => m.email !== email);
+  if(others.length){
+    const def = (currentAuthEmail && currentAuthEmail !== email && others.find(m => m.email === currentAuthEmail)) ? currentAuthEmail : others[0].email;
+    html += '<div class="member-profile-palmares"><h4>Rivalité ⚔️</h4><div class="gx-h2h-pick">Face-à-face contre <select id="gx-h2h-select" data-email="' + gxEsc(email) + '">' +
+      others.map(m => '<option value="' + gxEsc(m.email) + '"' + (m.email === def ? ' selected' : '') + '>' + gxEsc(m.pseudo) + (m.email === currentAuthEmail ? ' (moi)' : '') + '</option>').join('') +
+      '</select></div><div id="gx-h2h-body">' + gxRivalryHTML(email, def) + '</div></div>';
+  }
+  return html;
+}
+document.addEventListener('change', (e) => {
+  if(e.target && e.target.id === 'gx-h2h-select'){
+    const body = document.getElementById('gx-h2h-body');
+    if(body) body.innerHTML = gxRivalryHTML(e.target.getAttribute('data-email'), e.target.value);
+  }
+});
+
+/* ---------- Personnalisation du profil (Mon compte) ---------- */
+function gxRenderCustomizeForm(data){
+  const colorsEl = document.getElementById('profile-color-swatches');
+  if(colorsEl){
+    const current = (data && data.couleurProfil) || '';
+    colorsEl.innerHTML = '<button type="button" class="gx-swatch none' + (current ? '' : ' active') + '" data-color="" title="Aucune">✕</button>' +
+      GX_PROFILE_COLORS.map(c => '<button type="button" class="gx-swatch' + (current === c.id ? ' active' : '') + '" data-color="' + c.id + '" title="' + c.label + '" style="background:' + c.hex + '"></button>').join('');
+  }
+  const gamesEl = document.getElementById('profile-jeux-preferes');
+  if(gamesEl){
+    const sel = (data && Array.isArray(data.jeuxPreferes)) ? data.jeuxPreferes : [];
+    gamesEl.innerHTML = (window.__gxGames || []).map(g => '<button type="button" class="gx-game-pick' + (sel.includes(g.slug) ? ' active' : '') + '" data-slug="' + g.slug + '">' + stripIcon(g.icon) + ' ' + g.name + '</button>').join('');
+  }
+  const bioEl = document.getElementById('profile-bio');
+  if(bioEl) bioEl.value = (data && data.bio) || '';
+  const discordEl = document.getElementById('profile-discord');
+  if(discordEl) discordEl.value = (data && data.discord) || '';
+}
+document.addEventListener('click', (e) => {
+  const sw = e.target.closest('.gx-swatch');
+  if(sw){
+    document.querySelectorAll('#profile-color-swatches .gx-swatch').forEach(b => b.classList.remove('active'));
+    sw.classList.add('active');
+    return;
+  }
+  const gp = e.target.closest('.gx-game-pick');
+  if(gp){
+    if(!gp.classList.contains('active') && document.querySelectorAll('#profile-jeux-preferes .gx-game-pick.active').length >= 3){
+      showToast('3 jeux maximum — retire-en un d\'abord.');
+      return;
+    }
+    gp.classList.toggle('active');
+  }
+});
+function gxCustomizePayload(){
+  const out = {};
+  const bioEl = document.getElementById('profile-bio');
+  if(bioEl) out.bio = bioEl.value.trim().slice(0, 140) || null;
+  const discordEl = document.getElementById('profile-discord');
+  if(discordEl) out.discord = discordEl.value.trim().slice(0, 40) || null;
+  const sw = document.querySelector('#profile-color-swatches .gx-swatch.active');
+  if(sw) out.couleurProfil = sw.getAttribute('data-color') || null;
+  if(document.getElementById('profile-jeux-preferes')){
+    out.jeuxPreferes = Array.from(document.querySelectorAll('#profile-jeux-preferes .gx-game-pick.active')).map(b => b.getAttribute('data-slug'));
+  }
+  return out;
+}
 /* ---------- Archives GALACTIX : affichage public + gestion admin (Round 15, page VOD Round 34) ---------- */
 /* ---------- Lecteur VOD intégré directement sur le site, plutôt qu'un lien externe (Round 36) ---------- */
 function vodEmbedHtml(url){
@@ -4708,6 +5021,7 @@ if(profileExtraSaveBtn){
     const ageVal = profileAgeInput.value === '' ? null : Number(profileAgeInput.value);
     payload.age = (ageVal == null || isNaN(ageVal)) ? null : ageVal;
     payload.standFavori = profileStandFavoriSelect.value || null;
+    Object.assign(payload, gxCustomizePayload());
     try{
       await updateDoc(currentUserRef, payload);
       msg.className = 'account-msg ok';
