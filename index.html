@@ -3407,7 +3407,8 @@ async function openMemberProfile(email){
   const pseudo = cached ? cached.pseudo : email;
   const avatar = cached ? cached.avatar : null;
   const totalPoints = cached ? cached.totalPoints : 0;
-  const rank = rankIndex > -1 ? (rankIndex + 1) : null;
+  const rankTies = rankIndex > -1 ? rankListWithTies(communityRankingCache, 'totalPoints')[rankIndex] : null;
+  const rank = rankTies ? rankTies.position : null;
 
   let extra = {};
   try {
@@ -3440,7 +3441,7 @@ async function openMemberProfile(email){
         arenaSnap2.forEach(d => arenaRows.push(d.data()));
         arenaRows.sort((a, b) => (b.points || 0) - (a.points || 0));
         const idx = arenaRows.findIndex(x => x.email === email);
-        if(idx > -1) rankInArena = idx + 1;
+        if(idx > -1){ const pl = rankListWithTies(arenaRows.filter(x => (x.points || 0) > 0), 'points').find(x => x.item.email === email); rankInArena = pl ? (pl.position + (pl.tie ? ' =' : '')) : (idx + 1); }
       } catch(e) {}
       return { arenaName: arenaName, points: r.points || 0, rank: rankInArena };
     }));
@@ -3470,14 +3471,14 @@ async function openMemberProfile(email){
   if(favGame){
     html += '<div class="member-profile-row"><strong>Jeu où il performe le mieux :</strong> ' + favGame.icon + ' ' + favGame.name + '</div>';
   }
-  html += '<div class="member-profile-row"><strong>Classement général GALACTIX ARENA :</strong> ' + (rank ? ('#' + rank) : '—') + ' (' + totalPoints + ' pt' + (totalPoints > 1 ? 's' : '') + ')</div>';
+  html += '<div class="member-profile-row"><strong>Classement général GALACTIX ARENA :</strong> ' + (rank ? ('#' + rank + (rankTies && rankTies.tie ? ' ex æquo' : '')) : '—') + ' (' + totalPoints + ' pt' + (totalPoints > 1 ? 's' : '') + ')</div>';
   html += gxProfileExtraSectionsHTML(email, extra);
   html += '<div class="member-profile-palmares"><h4>Palmarès</h4>';
   if(palmares.length === 0){
     html += '<div class="admin-empty">Aucune arène pour l\'instant.</div>';
   } else {
     palmares.forEach(p => {
-      html += '<div class="member-profile-palmares-row"><span>' + p.arenaName + '</span><span>' + (p.rank ? ('#' + p.rank) : '—') + '</span><span>' + p.points + ' pt' + (p.points > 1 ? 's' : '') + '</span></div>';
+      html += '<div class="member-profile-palmares-row"><span>' + p.arenaName + '</span><span>' + (p.rank ? ('#' + String(p.rank).replace(' =', ' ex æquo')) : '—') + '</span><span>' + p.points + ' pt' + (p.points > 1 ? 's' : '') + '</span></div>';
     });
   }
   html += '</div>';
