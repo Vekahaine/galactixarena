@@ -404,6 +404,10 @@ nav .links a:hover{color:var(--yellow);}
 }
 .leaderboard-row,.participant-chip{cursor:pointer;transition:transform .15s ease,border-color .15s ease;}
 .leaderboard-row:hover,.participant-chip:hover{border-color:rgba(247,241,225,0.35);transform:translateY(-1px);}
+.admin-edit{background:rgba(244,196,48,0.15);color:var(--yellow);border:1px solid rgba(244,196,48,0.4);}
+.gx-stand-edit-icon,.gx-stand-edit-name{background:var(--night-2);color:var(--cream);border:1px solid rgba(247,241,225,0.2);border-radius:8px;padding:6px 8px;font-family:'Space Grotesk';font-size:0.9rem;margin-right:6px;}
+.gx-stand-edit-icon{width:54px;text-align:center;}
+.gx-stand-edit-name{width:200px;}
 /* ---------- Profils enrichis (Round 42) ---------- */
 .gx-badges{display:flex;flex-wrap:wrap;gap:8px;}
 .gx-badge{display:inline-flex;align-items:center;gap:6px;background:var(--night-3);border:1px solid rgba(244,196,48,0.3);border-radius:999px;padding:5px 12px;font-family:'Fredoka';font-weight:600;font-size:0.82rem;color:var(--cream);cursor:help;}
@@ -994,7 +998,7 @@ nav .brand:hover{opacity:0.82;}
       </div>
       <div class="arena-games-row">
         <span class="arena-chip">🫘 Fall Guys</span>
-        <span class="arena-chip">🧠 Quizz</span>
+        <span class="arena-chip">🧠 Quiz</span>
         <span class="arena-chip">🌍 GeoGuessr</span>
       </div>
       <div class="arena-games-row">
@@ -1273,7 +1277,7 @@ nav .brand:hover{opacity:0.82;}
             <button type="button" class="pill-tab-btn" data-kind="vod">Replay VOD</button>
           </div>
           <div class="account-login">
-            <input type="text" id="archive-title" placeholder="Titre (ex. Finale Quizz - GX 25.1)">
+            <input type="text" id="archive-title" placeholder="Titre (ex. Finale Quiz - GX 25.1)">
             <input type="text" id="archive-date" placeholder="Date (ex. 18 septembre 2026)">
           </div>
           <div class="account-login">
@@ -1308,7 +1312,7 @@ nav .brand:hover{opacity:0.82;}
           <h3>GALACTIX ARENA</h3>
           <p class="section-desc small">Samedi 3 octobre 2026, à partir de 20h30.</p>
           <div class="arena-card-games">
-            <span>🧠 Quizz</span>
+            <span>🧠 Quiz</span>
             <span>📚 WikiRace</span>
             <span>💣 Worms WMD</span>
             <span>🥊 Pummel Party</span>
@@ -1342,7 +1346,7 @@ nav .brand:hover{opacity:0.82;}
     <h2 class="section-title">GALACTIX ARENA</h2>
     <p class="section-desc">Samedi 3 octobre 2026, à partir de 20h30 — inscris-toi pour rejoindre l'arène, puis découvre le programme, les jeux, le barème de points, les participants et les résultats en direct.</p>
     <div class="arena-card-games">
-      <span>🧠 Quizz</span>
+      <span>🧠 Quiz</span>
       <span>📚 WikiRace</span>
       <span>💣 Worms WMD</span>
       <span>🥊 Pummel Party</span>
@@ -1371,7 +1375,7 @@ nav .brand:hover{opacity:0.82;}
     <div class="programme-grid">
       <div class="programme-main">
         <div class="timeline active" id="timeline-samedi">
-          <div class="tl-item"><div class="tl-time">20h30 – 21h00</div><div class="tl-name">Quizz</div><div class="tl-duration">30 minutes</div></div>
+          <div class="tl-item"><div class="tl-time">20h30 – 21h00</div><div class="tl-name">Quiz</div><div class="tl-duration">30 minutes</div></div>
           <div class="tl-item"><div class="tl-time">21h00 – 21h15</div><div class="tl-name">WikiRace</div><div class="tl-duration">15 minutes</div></div>
           <div class="tl-item"><div class="tl-time">21h15 – 21h45</div><div class="tl-name">Worms WMD</div><div class="tl-duration">30 minutes</div></div>
           <div class="tl-item"><div class="tl-time">21h45 – 22h30</div><div class="tl-name">Pummel Party</div><div class="tl-duration">45 minutes</div></div>
@@ -1650,13 +1654,14 @@ const games = [
   {name:'SpeedRunners 2', slug:'speedrunners-2', icon:'🏃'},
   {name:'TrackMania', slug:'trackmania', icon:'🏎️'},
   {name:'Fall Guys', slug:'fall-guys', icon:'🫘'},
-  {name:'Quizz', slug:'quizz', icon:'🧠'},
+  {name:'Quiz', slug:'quizz', icon:'🧠'},
   {name:'GeoGuessr', slug:'geoguessr', icon:'🌍'},
   {name:'Curve Fever', slug:'curve-fever', icon:'🐍'},
   {name:'Mecha Chameleon', slug:'mecha-chameleon', icon:'🦎<span class="icon-sup">🖌️</span>'},
   {name:'WikiRace', slug:'wikirace', icon:'📚'}
 ];
 window.__gxGames = games;
+window.__gxDefaultGames = games.map(g => Object.assign({}, g));
 const standsGrid = document.getElementById('stands-grid');
 games.forEach(g=>{
   const div = document.createElement('div');
@@ -4857,12 +4862,40 @@ if(gameAddBtn){
   });
 }
 const adminGamesListEl = document.getElementById('admin-games-list');
-onSnapshot(collection(db, 'games'), (snap) => {
+/* (Round 44) Les textes de jeux écrits en dur dans la page (bandeau de
+   chips, grille des stands de l'accueil, ancienne page de l'arène 1.1)
+   reprennent automatiquement le nom/l'icône à jour du catalogue Firestore. */
+function gxApplyGameNamesToStatic(list){
+  const defaults = window.__gxDefaultGames || [];
+  const grid = document.getElementById('stands-grid');
+  defaults.forEach((def, i) => {
+    const g = list.find(x => x.slug === def.slug);
+    if(!g) return;
+    const card = grid && grid.children[i];
+    if(card){
+      const h = card.querySelector('h3'); if(h && h.textContent !== g.name) h.textContent = g.name;
+      const ic = card.querySelector('.stand-icon');
+      if(ic && stripIcon(g.icon) && stripIcon(g.icon) !== stripIcon(def.icon)) ic.textContent = stripIcon(g.icon);
+    }
+    if(g.name === def.name && stripIcon(g.icon) === stripIcon(def.icon)) return;
+    const oldTexts = [stripIcon(def.icon) + ' ' + def.name, def.name];
+    document.querySelectorAll('.arena-chip, .arena-card-games span, .tl-name').forEach(el => {
+      const t = el.textContent.trim();
+      if(t === oldTexts[0]) el.textContent = stripIcon(g.icon) + ' ' + g.name;
+      else if(t === oldTexts[1]) el.textContent = g.name;
+    });
+  });
+}
+let gxLastGamesSnap = null;
+window.__gxRenderAdminGames = () => { if(gxLastGamesSnap) gxRenderGamesSnapshot(gxLastGamesSnap); };
+onSnapshot(collection(db, 'games'), (snap) => { gxLastGamesSnap = snap; gxRenderGamesSnapshot(snap); });
+function gxRenderGamesSnapshot(snap){
   const list = [];
   snap.forEach(d => list.push({ id: d.id, ...d.data() }));
   if(list.length){
     list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
     window.__gxGames = list;
+    gxApplyGameNamesToStatic(list);
   }
   if(adminGamesListEl){
     if(list.length === 0){
@@ -4874,6 +4907,38 @@ onSnapshot(collection(db, 'games'), (snap) => {
         row.className = 'admin-item';
         row.innerHTML = '<div class="admin-item-info">' + stripIcon(g.icon) + ' ' + g.name + '<span>' + g.slug + '</span></div><div class="admin-actions"></div>';
         const actions = row.querySelector('.admin-actions');
+        const editBtn = document.createElement('button');
+        editBtn.className = 'admin-btn admin-edit';
+        editBtn.textContent = 'Modifier';
+        editBtn.addEventListener('click', () => {
+          const info = row.querySelector('.admin-item-info');
+          info.innerHTML = '';
+          const iconIn = document.createElement('input');
+          iconIn.type = 'text'; iconIn.value = stripIcon(g.icon) || ''; iconIn.className = 'gx-stand-edit-icon'; iconIn.title = 'Icône (émoji)';
+          const nameIn = document.createElement('input');
+          nameIn.type = 'text'; nameIn.value = g.name || ''; nameIn.className = 'gx-stand-edit-name'; nameIn.title = 'Nom du jeu';
+          const hint = document.createElement('span');
+          hint.textContent = g.slug + ' — le nouveau nom s\'applique partout (site, classements, profils, bot Discord)';
+          info.appendChild(iconIn); info.appendChild(nameIn); info.appendChild(hint);
+          actions.innerHTML = '';
+          const save = document.createElement('button');
+          save.className = 'admin-btn admin-approve'; save.textContent = 'Enregistrer';
+          save.addEventListener('click', async () => {
+            const name = nameIn.value.trim();
+            if(!name){ nameIn.focus(); return; }
+            save.disabled = true;
+            try{
+              await updateDoc(doc(db, 'games', g.id), { name: name, icon: iconIn.value.trim() || g.icon });
+              showToast('Stand renommé : ' + name);
+            }catch(e){ save.disabled = false; showToast('Erreur : ' + e.message); }
+          });
+          const cancel = document.createElement('button');
+          cancel.className = 'admin-btn'; cancel.textContent = 'Annuler';
+          cancel.addEventListener('click', () => { if(typeof window.__gxRenderAdminGames === 'function') window.__gxRenderAdminGames(); });
+          actions.appendChild(save); actions.appendChild(cancel);
+          nameIn.focus();
+        });
+        actions.appendChild(editBtn);
         const delBtn = document.createElement('button');
         delBtn.className = 'admin-btn admin-refuse';
         delBtn.textContent = 'Supprimer';
@@ -4890,7 +4955,7 @@ onSnapshot(collection(db, 'games'), (snap) => {
   if(typeof refreshArenaGameAddOptions === 'function') refreshArenaGameAddOptions();
   if(typeof renderArenaGamesPicker === 'function') renderArenaGamesPicker();
   if(typeof renderStandFavoriOptions === 'function') renderStandFavoriOptions();
-});
+}
 
 async function bootstrapGamesCatalog(){
   try{
@@ -4954,9 +5019,17 @@ async function bootstrapNewGamesCatalog(){
           name: g.name, slug: g.slug, icon: g.icon,
           createdAt: serverTimestamp(), createdBy: ADMIN_EMAIL
         });
-      } else if(snap.data().name !== g.name){
-        await updateDoc(ref, { name: g.name });
       }
+      /* (Round 44) Plus d'écrasement du nom : un stand renommé depuis
+         l'admin garde son nouveau nom. */
+    }
+    /* Renommages ponctuels (appliqués une seule fois, seulement si le stand
+       porte encore l'ancien nom). */
+    const renames = [{ slug: 'quizz', from: 'Quizz', to: 'Quiz' }];
+    for(const r of renames){
+      const ref = doc(db, 'games', r.slug);
+      const snap = await getDoc(ref);
+      if(snap.exists() && snap.data().name === r.from) await updateDoc(ref, { name: r.to });
     }
   }catch(err){ console.warn('bootstrapNewGamesCatalog', err); }
 }
