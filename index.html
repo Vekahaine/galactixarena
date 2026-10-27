@@ -784,6 +784,17 @@ footer .brand{justify-content:center;margin-bottom:10px;}
 .admin-empty{font-size:0.85rem;color:var(--cream-dim);}
 .admin-idea-list{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:10px 0 0;list-style:none;}
 .admin-idea-list li{background:var(--night-2);border:1px solid rgba(247,241,225,0.12);border-radius:999px;padding:6px 14px;font-size:0.8rem;color:var(--cream-dim);}
+.admin-idea-list li.gx-idee{display:inline-flex;align-items:center;gap:6px;padding:5px 8px 5px 14px;}
+.admin-idea-list li.gx-idee button{background:none;border:none;color:var(--cream-dim);cursor:pointer;font-size:0.78rem;padding:2px 4px;border-radius:6px;line-height:1;opacity:0.55;}
+.admin-idea-list li.gx-idee button:hover{opacity:1;background:rgba(247,241,225,0.08);}
+.admin-idea-list li.gx-idee input{background:transparent;border:none;border-bottom:1px solid var(--gold,#f4c430);color:var(--cream);font-size:0.8rem;width:150px;outline:none;padding:0;}
+.gx-idees-add{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center;}
+.gx-idees-add input{margin:0;}
+.gx-idees-add input{flex:1;min-width:180px;}
+.gx-idees-aide{margin-top:8px;font-size:0.75rem;}
+.gx-emoji-suggest{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 12px;font-size:0.78rem;color:var(--cream-dim);}
+.gx-emoji-suggest button{background:var(--night-2);border:1px solid rgba(247,241,225,0.12);border-radius:8px;font-size:1.05rem;line-height:1;padding:5px 7px;cursor:pointer;}
+.gx-emoji-suggest button:hover{border-color:rgba(244,196,48,0.6);}
 
 /* ---------- STATUT D'ARENE (Round 24) ---------- */
 .status-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Fredoka';font-weight:600;font-size:0.78rem;padding:5px 14px 5px 10px;border-radius:999px;margin-bottom:14px;}
@@ -1263,6 +1274,19 @@ nav .brand:hover{opacity:0.82;}
             <input type="text" id="game-name" placeholder="Nom du stand (ex. Mario Kart)">
             <input type="text" id="game-icon" placeholder="Émoji" maxlength="8" style="max-width:90px;">
           </div>
+          <div class="gx-emoji-suggest" id="gx-emoji-suggest">
+            <span>Suggestions :</span>
+            <button type="button" data-emoji="⚡" title="Laser / énergie (idéal pour Laser League)">⚡</button>
+            <button type="button" data-emoji="🎯" title="Tir / précision">🎯</button>
+            <button type="button" data-emoji="💥" title="Explosion / impact">💥</button>
+            <button type="button" data-emoji="👾" title="Arcade / rétro">👾</button>
+            <button type="button" data-emoji="🕹️" title="Jeu vidéo">🕹️</button>
+            <button type="button" data-emoji="🚀" title="Espace / vitesse">🚀</button>
+            <button type="button" data-emoji="🕵️" title="Enquête / imposteur">🕵️</button>
+            <button type="button" data-emoji="⛰️" title="Montagne / escalade">⛰️</button>
+            <button type="button" data-emoji="📦" title="Objets / loot">📦</button>
+            <button type="button" data-emoji="🏆" title="Compétition">🏆</button>
+          </div>
           <button class="btn btn-primary" id="game-add-btn">Ajouter ce stand</button>
           <div class="account-msg" id="game-add-msg"></div>
           <div id="admin-games-list"></div>
@@ -1270,8 +1294,13 @@ nav .brand:hover{opacity:0.82;}
 
         <div class="admin-results">
           <h3>💡 Idées de jeux (pense-bête)</h3>
-          <div class="account-hint">Liste perso, visible uniquement par toi ici dans l'admin — pas ajoutés au catalogue des stands. À piocher le jour où tu veux ajouter un nouveau jeu.</div>
-          <ul class="admin-idea-list"><li>Among Us</li><li>Project Winter</li><li>PUBG</li><li>Mimic Party</li><li>Dead by Daylight</li><li>Age of Empires</li><li>Jeux Zlan</li><li>Imposteur</li><li>Skribbl</li><li>BombParty</li><li>Bomberman</li><li>GeoQuizz</li><li>Keep Talking and Nobody Explodes</li><li>Laser League</li><li>Who's Cheating</li><li>Crack (Steam)</li><li>R.E.P.O.</li><li>PEAK</li></ul>
+          <div class="account-hint">Liste perso, affichée uniquement ici dans l'admin — pas ajoutés au catalogue des stands. À piocher le jour où tu veux ajouter un nouveau jeu.</div>
+          <ul class="admin-idea-list" id="gx-idees-list"><li>Among Us</li><li>Project Winter</li><li>PUBG</li><li>Mimic Party</li><li>Dead by Daylight</li><li>Age of Empires</li><li>Jeux Zlan</li><li>Imposteur</li><li>Skribbl</li><li>BombParty</li><li>Bomberman</li><li>GeoQuizz</li><li>Keep Talking and Nobody Explodes</li><li>Laser League</li><li>Who's Cheating</li><li>Crack (Steam)</li><li>R.E.P.O.</li><li>PEAK</li></ul>
+          <div class="gx-idees-add">
+            <input type="text" id="gx-idee-input" placeholder="Ajouter une idée (ex. Lethal Company)" maxlength="60">
+            <button type="button" class="btn btn-primary" id="gx-idee-add-btn">Ajouter</button>
+          </div>
+          <div class="account-hint gx-idees-aide">Clique sur ✏️ pour renommer une idée, sur ✕ pour la retirer. Enregistré automatiquement.</div>
         </div>
       </div>
 
@@ -2514,6 +2543,7 @@ onAuthStateChanged(auth, (user) => {
 
   if(email === ADMIN_EMAIL){
     setAdminUI(true);
+    if(typeof window.__gxIdeesStart === 'function') window.__gxIdeesStart();
     const qPending = query(collection(db, 'registrations'), where('approved', '==', false));
     adminPendingUnsub = onSnapshot(qPending, (snap) => {
       const items = [];
@@ -4780,6 +4810,7 @@ async function renderDynamicArenaPage(kermesseId){
 
 /* ---------- Catalogue des stands en Firestore (Round 16) ---------- */
 const EMOJI_KEYWORDS = [
+  [/laser/i, '⚡'],
   [/quiz|culture|trivia/i, '🧠'],
   [/geo|map|monde|carte du monde/i, '🌍'],
   [/party|fête|soiree|soirée/i, '🥳'],
@@ -4834,6 +4865,10 @@ if(gameNameInput && gameIconInput){
     }
   });
   gameIconInput.addEventListener('input', () => { gameIconInput.dataset.touched = '1'; });
+  /* (Round 48) Suggestions d'émojis cliquables (⚡ = laser, pour Laser League). */
+  document.querySelectorAll('#gx-emoji-suggest button[data-emoji]').forEach(b => {
+    b.addEventListener('click', () => { gameIconInput.value = b.dataset.emoji; gameIconInput.dataset.touched = '1'; gameIconInput.focus(); });
+  });
 }
 const gameAddBtn = document.getElementById('game-add-btn');
 if(gameAddBtn){
@@ -4921,6 +4956,77 @@ if(gxAnnonceBtn){
     }catch(e){ gxAnnonceBtn.disabled = false; showToast('Erreur : ' + e.message); }
   });
 }
+/* (Round 48) Pense-bête "Idées de jeux" modifiable depuis l'admin.
+   Stocké dans archives/config-idees (écriture admin, comme config-site ;
+   pas de champ "date" → n'apparaît jamais dans Souvenirs / VOD). Le
+   document n'est lu que quand l'admin est connecté. Tant qu'il n'existe
+   pas, on part de la liste écrite dans la page. */
+const gxIdeesRef = doc(db, 'archives', 'config-idees');
+const gxIdeesListEl = document.getElementById('gx-idees-list');
+let gxIdees = gxIdeesListEl ? Array.from(gxIdeesListEl.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean) : [];
+let gxIdeesEditIndex = -1;
+let gxIdeesStarted = false;
+function gxIdeesRender(){
+  if(!gxIdeesListEl) return;
+  gxIdeesListEl.innerHTML = '';
+  if(!gxIdees.length){ gxIdeesListEl.innerHTML = '<li class="admin-empty" style="background:none;border:none;padding:0;">Aucune idée pour le moment.</li>'; return; }
+  gxIdees.forEach((nom, i) => {
+    const li = document.createElement('li');
+    li.className = 'gx-idee';
+    if(i === gxIdeesEditIndex){
+      const input = document.createElement('input');
+      input.type = 'text'; input.value = nom; input.maxLength = 60;
+      const ok = document.createElement('button'); ok.type = 'button'; ok.textContent = '✔'; ok.title = 'Enregistrer';
+      const valider = () => {
+        const v = input.value.trim();
+        gxIdeesEditIndex = -1;
+        if(v && v !== nom){ const copie = gxIdees.slice(); copie[i] = v; gxIdeesSave(copie, 'Idée renommée : ' + v); }
+        else gxIdeesRender();
+      };
+      ok.addEventListener('click', valider);
+      input.addEventListener('keydown', (e) => { if(e.key === 'Enter') valider(); if(e.key === 'Escape'){ gxIdeesEditIndex = -1; gxIdeesRender(); } });
+      li.appendChild(input); li.appendChild(ok);
+      gxIdeesListEl.appendChild(li);
+      setTimeout(() => { input.focus(); input.select(); }, 0);
+      return;
+    }
+    const label = document.createElement('span'); label.textContent = nom;
+    const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = '✏️'; edit.title = 'Renommer';
+    edit.addEventListener('click', () => { gxIdeesEditIndex = i; gxIdeesRender(); });
+    const del = document.createElement('button'); del.type = 'button'; del.textContent = '✕'; del.title = 'Retirer';
+    del.addEventListener('click', () => { const copie = gxIdees.slice(); copie.splice(i, 1); gxIdeesSave(copie, 'Idée retirée : ' + nom); });
+    li.appendChild(label); li.appendChild(edit); li.appendChild(del);
+    gxIdeesListEl.appendChild(li);
+  });
+}
+async function gxIdeesSave(liste, message){
+  const avant = gxIdees;
+  gxIdees = liste; gxIdeesRender();
+  try{
+    await setDoc(gxIdeesRef, { idees: liste, kind: 'config' }, { merge: true });
+    if(message) showToast(message);
+  }catch(e){ gxIdees = avant; gxIdeesRender(); showToast('Erreur : ' + e.message); }
+}
+window.__gxIdeesStart = () => {
+  if(gxIdeesStarted || !gxIdeesListEl) return;
+  gxIdeesStarted = true;
+  gxIdeesRender();
+  onSnapshot(gxIdeesRef, (snap) => {
+    if(snap.exists() && Array.isArray(snap.data().idees)){ gxIdees = snap.data().idees.slice(); if(gxIdeesEditIndex < 0) gxIdeesRender(); }
+  }, () => {});
+};
+const gxIdeeInput = document.getElementById('gx-idee-input');
+const gxIdeeAddBtn = document.getElementById('gx-idee-add-btn');
+function gxIdeeAjouter(){
+  if(!gxIdeeInput) return;
+  const v = gxIdeeInput.value.trim();
+  if(!v){ gxIdeeInput.focus(); return; }
+  if(gxIdees.some(x => x.toLowerCase() === v.toLowerCase())){ showToast('« ' + v + ' » est déjà dans la liste.'); return; }
+  gxIdeeInput.value = '';
+  gxIdeesSave(gxIdees.concat([v]), 'Idée ajoutée : ' + v);
+}
+if(gxIdeeAddBtn) gxIdeeAddBtn.addEventListener('click', gxIdeeAjouter);
+if(gxIdeeInput) gxIdeeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); gxIdeeAjouter(); } });
 let gxLastGamesSnap = null;
 window.__gxRenderAdminGames = () => { if(gxLastGamesSnap) gxRenderGamesSnapshot(gxLastGamesSnap); };
 onSnapshot(collection(db, 'games'), (snap) => { gxLastGamesSnap = snap; gxRenderGamesSnapshot(snap); });
