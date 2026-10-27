@@ -404,6 +404,9 @@ nav .links a:hover{color:var(--yellow);}
 }
 .leaderboard-row,.participant-chip{cursor:pointer;transition:transform .15s ease,border-color .15s ease;}
 .leaderboard-row:hover,.participant-chip:hover{border-color:rgba(247,241,225,0.35);transform:translateY(-1px);}
+.gx-site-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--night-2);border:1px solid rgba(247,241,225,0.1);border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:0.9rem;color:var(--cream);}
+.gx-site-toggle b.on{color:#5fd6a8;} .gx-site-toggle b.off{color:#f28b7f;}
+.gx-annonce-masquee{display:none !important;}
 .admin-edit{background:rgba(244,196,48,0.15);color:var(--yellow);border:1px solid rgba(244,196,48,0.4);}
 .gx-stand-edit-icon,.gx-stand-edit-name{background:var(--night-2);color:var(--cream);border:1px solid rgba(247,241,225,0.2);border-radius:8px;padding:6px 8px;font-family:'Space Grotesk';font-size:0.9rem;margin-right:6px;}
 .gx-stand-edit-icon{width:54px;text-align:center;}
@@ -1184,6 +1187,10 @@ nav .brand:hover{opacity:0.82;}
     <div class="account-hint" id="admin-page-denied">Cette page est réservée à l'administration de la kermesse. Connecte-toi avec le compte admin pour y accéder.</div>
 
     <div class="admin-panel hidden" id="admin-panel">
+      <div class="gx-site-toggle">
+        <span>📢 Annonce <strong>Paris 2027</strong> sur l'accueil : <b id="gx-annonce-etat">…</b></span>
+        <button type="button" class="admin-btn admin-edit" id="gx-annonce-btn" disabled>…</button>
+      </div>
       <div class="admin-tabs">
         <button type="button" class="admin-tab-btn active" data-admin-tab="demandes">Demandes<span class="admin-tab-badge hidden" id="admin-tab-badge-demandes">0</span></button>
         <button type="button" class="admin-tab-btn" data-admin-tab="arenes">Arènes &amp; barèmes</button>
@@ -4884,6 +4891,34 @@ function gxApplyGameNamesToStatic(list){
       if(t === oldTexts[0]) el.textContent = stripIcon(g.icon) + ' ' + g.name;
       else if(t === oldTexts[1]) el.textContent = g.name;
     });
+  });
+}
+/* (Round 46) Afficher / masquer l'annonce Paris 2027 de l'accueil, pour
+   tout le monde. Réglage stocké dans archives/config-site (lecture publique,
+   écriture admin — règles déjà en place). Ce document n'a pas de champ
+   "date", il n'apparaît donc jamais dans les listes Souvenirs / VOD. */
+const gxConfigRef = doc(db, 'archives', 'config-site');
+function gxAppliquerAnnonce(visible){
+  document.querySelectorAll('.hero-announce, #annonce-paris').forEach(el => el.classList.toggle('gx-annonce-masquee', !visible));
+  const etat = document.getElementById('gx-annonce-etat');
+  const btn = document.getElementById('gx-annonce-btn');
+  if(etat){ etat.textContent = visible ? 'affichée' : 'masquée'; etat.className = visible ? 'on' : 'off'; }
+  if(btn){ btn.textContent = visible ? 'Masquer' : 'Réafficher'; btn.disabled = false; btn.dataset.visible = visible ? '1' : '0'; }
+  try{ localStorage.setItem('gx_annonce_paris', visible ? '1' : '0'); }catch(e){}
+}
+try{ if(localStorage.getItem('gx_annonce_paris') === '0') gxAppliquerAnnonce(false); }catch(e){}
+onSnapshot(gxConfigRef, (snap) => {
+  gxAppliquerAnnonce(!(snap.exists() && snap.data().annonceParis === false));
+}, () => {});
+const gxAnnonceBtn = document.getElementById('gx-annonce-btn');
+if(gxAnnonceBtn){
+  gxAnnonceBtn.addEventListener('click', async () => {
+    const visible = gxAnnonceBtn.dataset.visible !== '0';
+    gxAnnonceBtn.disabled = true;
+    try{
+      await setDoc(gxConfigRef, { annonceParis: !visible, kind: 'config' }, { merge: true });
+      showToast(visible ? 'Annonce Paris 2027 masquée sur l\'accueil.' : 'Annonce Paris 2027 réaffichée sur l\'accueil.');
+    }catch(e){ gxAnnonceBtn.disabled = false; showToast('Erreur : ' + e.message); }
   });
 }
 let gxLastGamesSnap = null;
