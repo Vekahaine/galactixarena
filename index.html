@@ -784,6 +784,19 @@ footer .brand{justify-content:center;margin-bottom:10px;}
 .admin-empty{font-size:0.85rem;color:var(--cream-dim);}
 .admin-idea-list{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:10px 0 0;list-style:none;}
 .admin-idea-list li{background:var(--night-2);border:1px solid rgba(247,241,225,0.12);border-radius:999px;padding:6px 14px;font-size:0.8rem;color:var(--cream-dim);}
+.gx-membres-outils{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0;}
+.gx-membres-outils input{flex:1;min-width:200px;margin:0;}
+.gx-membres-compte{font-size:0.82rem;color:var(--cream-dim);margin-bottom:8px;}
+.gx-membres-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+.gx-membres-table th{text-align:left;color:var(--cream-dim);font-weight:600;padding:8px 10px;border-bottom:1px solid rgba(247,241,225,0.15);}
+.gx-membres-table td{padding:8px 10px;border-bottom:1px solid rgba(247,241,225,0.06);color:var(--cream);vertical-align:middle;}
+.gx-membres-table tr:hover td{background:rgba(255,255,255,0.03);}
+.gx-membres-table .gx-mail{cursor:pointer;color:#7fd3ff;word-break:break-all;}
+.gx-membres-table .gx-mail:hover{text-decoration:underline;}
+.gx-membres-table .gx-av{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--night-2);display:inline-block;vertical-align:middle;}
+.gx-membres-table .gx-tag{display:inline-block;font-size:0.7rem;padding:2px 8px;border-radius:999px;background:rgba(244,196,48,0.15);color:#f4c430;margin-left:6px;}
+.gx-membres-wrap{overflow-x:auto;}
+.gx-email-change{margin-top:6px;}
 .admin-idea-list li.gx-idee{display:inline-flex;align-items:center;gap:6px;padding:5px 8px 5px 14px;}
 .admin-idea-list li.gx-idee button{background:none;border:none;color:var(--cream-dim);cursor:pointer;font-size:0.78rem;padding:2px 4px;border-radius:6px;line-height:1;opacity:0.55;}
 .admin-idea-list li.gx-idee button:hover{opacity:1;background:rgba(247,241,225,0.08);}
@@ -1174,6 +1187,14 @@ nav .brand:hover{opacity:0.82;}
       <button class="btn btn-ghost" type="button" id="profile-extra-save-btn">Enregistrer mes infos</button>
       <div class="account-msg" id="profile-extra-msg"></div>
       <div class="account-msg" id="account-profile-msg"></div>
+      <h3>📧 Mon adresse e-mail</h3>
+      <div class="account-hint">Adresse actuelle : <b id="gx-email-actuel">…</b><br>Pour la changer, indique la nouvelle adresse et ton mot de passe : un lien de confirmation est envoyé à la nouvelle adresse. Une fois cliqué, reconnecte-toi avec ta nouvelle adresse — ton profil, tes inscriptions et tes résultats suivent automatiquement.</div>
+      <div class="account-login gx-email-change">
+        <input type="email" id="gx-email-nouveau" placeholder="Nouvelle adresse e-mail" autocomplete="email">
+        <input type="password" id="gx-email-mdp" placeholder="Mot de passe actuel" autocomplete="current-password">
+      </div>
+      <button class="btn btn-ghost" type="button" id="gx-email-btn">Changer mon e-mail</button>
+      <div class="account-msg" id="gx-email-msg"></div>
       <button class="account-logout" id="account-logout-btn">Se déconnecter</button>
     </div>
 
@@ -1208,6 +1229,7 @@ nav .brand:hover{opacity:0.82;}
         <button type="button" class="admin-tab-btn" data-admin-tab="resultats">Résultats</button>
         <button type="button" class="admin-tab-btn" data-admin-tab="stands">Stands</button>
         <button type="button" class="admin-tab-btn" data-admin-tab="archives">Archives</button>
+        <button type="button" class="admin-tab-btn" data-admin-tab="membres" id="admin-tab-membres">Membres</button>
       </div>
 
       <div class="admin-tab-panel active" data-admin-panel="demandes">
@@ -1301,6 +1323,21 @@ nav .brand:hover{opacity:0.82;}
             <button type="button" class="btn btn-primary" id="gx-idee-add-btn">Ajouter</button>
           </div>
           <div class="account-hint gx-idees-aide">Clique sur ✏️ pour renommer une idée, sur ✕ pour la retirer. Enregistré automatiquement.</div>
+        </div>
+      </div>
+
+      <div class="admin-tab-panel" data-admin-panel="membres">
+        <div class="admin-results">
+          <h3>👥 Membres inscrits sur le site</h3>
+          <div class="account-hint">Tous les comptes créés sur le site, avec leur e-mail. Clique sur une adresse pour la copier.</div>
+          <div class="gx-membres-outils">
+            <input type="search" id="gx-membres-recherche" placeholder="Rechercher un pseudo ou un e-mail…">
+            <button type="button" class="admin-btn admin-edit" id="gx-membres-copier">📋 Copier toutes les adresses</button>
+            <button type="button" class="admin-btn admin-edit" id="gx-membres-csv">⬇️ Export CSV</button>
+            <button type="button" class="admin-btn" id="gx-membres-maj">🔄 Actualiser</button>
+          </div>
+          <div class="gx-membres-compte" id="gx-membres-compte"></div>
+          <div id="gx-membres-liste"><div class="admin-empty">Ouvre cet onglet pour charger la liste.</div></div>
         </div>
       </div>
 
@@ -1731,7 +1768,7 @@ document.querySelectorAll('.tl-name').forEach(el=>{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail,
-  onAuthStateChanged, signOut
+  onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
@@ -2513,6 +2550,13 @@ onAuthStateChanged(auth, (user) => {
   currentUserUnsub = onSnapshot(currentUserRef, (snap) => {
     if(!snap.exists()){
       hideAllAccountCards();
+      /* (Round 49) Après un changement d'e-mail, le profil est transféré
+         automatiquement au lieu de redemander un pseudo. */
+      if(typeof window.__gxTransfertProfil === 'function' && !window.__gxTransfertTente){
+        window.__gxTransfertTente = true;
+        window.__gxTransfertProfil(email).then(ok => { if(!ok) accountSetupCard.classList.remove('hidden'); });
+        return;
+      }
       accountSetupCard.classList.remove('hidden');
       return;
     }
@@ -5027,6 +5071,144 @@ function gxIdeeAjouter(){
 }
 if(gxIdeeAddBtn) gxIdeeAddBtn.addEventListener('click', gxIdeeAjouter);
 if(gxIdeeInput) gxIdeeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); gxIdeeAjouter(); } });
+/* (Round 49) Changement d'adresse e-mail depuis « Mon compte ».
+   1. Le membre confirme avec son mot de passe, Firebase envoie un lien de
+      confirmation à la nouvelle adresse (verifyBeforeUpdateEmail).
+   2. Une notification admin "email_change" (ancien → nouveau) est créée :
+      tu la vois dans la cloche, et le bot Discord (droits admin) transfère
+      tout ce qui est rangé par e-mail (inscriptions, résultats, lien
+      Discord) dès que le lien est cliqué.
+   3. À la 1re connexion avec la nouvelle adresse, le profil (pseudo, avatar,
+      infos) est recopié tout de suite par le site (__gxTransfertProfil). */
+const gxEmailActuelEl = document.getElementById('gx-email-actuel');
+onAuthStateChanged(auth, (u) => { if(gxEmailActuelEl) gxEmailActuelEl.textContent = u && u.email ? u.email : '—'; });
+const gxEmailBtn = document.getElementById('gx-email-btn');
+if(gxEmailBtn){
+  gxEmailBtn.addEventListener('click', async () => {
+    const msg = document.getElementById('gx-email-msg');
+    const nouveau = (document.getElementById('gx-email-nouveau').value || '').trim().toLowerCase();
+    const mdp = document.getElementById('gx-email-mdp').value || '';
+    const u = auth.currentUser;
+    msg.className = 'account-msg';
+    msg.textContent = '';
+    if(!u || !u.email){ msg.className = 'account-msg err'; msg.textContent = 'Ta session a expiré, reconnecte-toi.'; return; }
+    const ancien = u.email.toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nouveau)){ msg.className = 'account-msg err'; msg.textContent = 'Adresse e-mail invalide.'; return; }
+    if(nouveau === ancien){ msg.className = 'account-msg err'; msg.textContent = "C'est déjà ton adresse actuelle."; return; }
+    if(!mdp){ msg.className = 'account-msg err'; msg.textContent = 'Indique ton mot de passe actuel pour confirmer.'; return; }
+    gxEmailBtn.disabled = true;
+    try{
+      await reauthenticateWithCredential(u, EmailAuthProvider.credential(ancien, mdp));
+      await verifyBeforeUpdateEmail(u, nouveau);
+      const pseudo = (lastKnownUserData && lastKnownUserData.pseudo) || ancien;
+      await setDoc(doc(collection(db, 'notifications')), {
+        type: 'email_change', audience: 'admin',
+        title: 'Changement d\'e-mail demandé',
+        message: pseudo + ' : ' + ancien + ' → ' + nouveau + ' (en attente de confirmation par le membre)',
+        link: '#administration', createdAt: serverTimestamp(),
+        uid: u.uid, ancien: ancien, nouveau: nouveau, pseudo: pseudo
+      }).catch(() => {});
+      document.getElementById('gx-email-mdp').value = '';
+      msg.className = 'account-msg ok';
+      msg.textContent = '📨 Lien envoyé à ' + nouveau + ' ! Clique dessus (pense aux spams), puis reconnecte-toi avec ta nouvelle adresse. Ton profil et tes résultats suivront automatiquement.';
+    }catch(err){
+      msg.className = 'account-msg err';
+      const code = err && err.code ? err.code : '';
+      if(code === 'auth/invalid-credential' || code === 'auth/wrong-password') msg.textContent = 'Mot de passe incorrect.';
+      else if(code === 'auth/email-already-in-use') msg.textContent = 'Un autre compte utilise déjà cette adresse.';
+      else msg.textContent = authErrorMessage(err, "Impossible de changer l'adresse pour le moment.");
+    }finally{
+      gxEmailBtn.disabled = false;
+    }
+  });
+}
+window.__gxTransfertProfil = async (email) => {
+  try{
+    const q = query(collection(db, 'notifications'), where('type', '==', 'email_change'), where('nouveau', '==', email));
+    const s = await getDocs(q);
+    if(s.empty) return false;
+    let demande = null;
+    s.forEach(d => { const x = d.data(); if(!demande || ((x.createdAt && x.createdAt.seconds) || 0) > ((demande.createdAt && demande.createdAt.seconds) || 0)) demande = x; });
+    const ancienSnap = await getDoc(doc(db, 'users', sanitizeEmail(demande.ancien)));
+    if(!ancienSnap.exists()) return false;
+    const data = Object.assign({}, ancienSnap.data(), { email: email });
+    await setDoc(doc(db, 'users', sanitizeEmail(email)), data);
+    showToast('✅ Ton profil a été transféré sur ta nouvelle adresse.');
+    return true;
+  }catch(e){ return false; }
+};
+
+/* (Round 49) Admin → Membres : liste de tous les comptes du site. */
+let gxMembres = [];
+let gxMembresCharges = false;
+function gxEchap(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function gxDateFr(ts){
+  if(!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : (ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts));
+  return isNaN(d) ? '—' : d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+function gxMembresRendu(){
+  const liste = document.getElementById('gx-membres-liste');
+  const compte = document.getElementById('gx-membres-compte');
+  if(!liste) return;
+  const f = (document.getElementById('gx-membres-recherche').value || '').trim().toLowerCase();
+  const vus = gxMembres.filter(m => !f || (m.pseudo || '').toLowerCase().includes(f) || (m.email || '').toLowerCase().includes(f));
+  compte.textContent = gxMembres.length + ' compte' + (gxMembres.length > 1 ? 's' : '') + (f ? ' · ' + vus.length + ' affiché' + (vus.length > 1 ? 's' : '') : '');
+  if(!vus.length){ liste.innerHTML = '<div class="admin-empty">Aucun membre ne correspond.</div>'; return; }
+  liste.innerHTML = '<div class="gx-membres-wrap"><table class="gx-membres-table"><thead><tr><th></th><th>Pseudo</th><th>E-mail</th><th>Inscrit le</th><th>Arènes</th></tr></thead><tbody>' +
+    vus.map(m => {
+      const av = m.avatar && /^(https?:|data:image)/.test(m.avatar) ? '<img class="gx-av" src="' + gxEchap(m.avatar) + '" alt="">' : '<span class="gx-av"></span>';
+      const chg = m.changement ? '<span class="gx-tag" title="Changement d\'e-mail demandé">→ ' + gxEchap(m.changement) + '</span>' : '';
+      return '<tr><td>' + av + '</td><td>' + gxEchap(m.pseudo || '—') + (m.email === ADMIN_EMAIL ? '<span class="gx-tag">admin</span>' : '') + '</td>' +
+        '<td><span class="gx-mail" data-mail="' + gxEchap(m.email) + '" title="Cliquer pour copier">' + gxEchap(m.email || '—') + '</span>' + chg + '</td>' +
+        '<td>' + gxDateFr(m.createdAt) + '</td><td>' + (m.arenes || 0) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+  liste.querySelectorAll('.gx-mail').forEach(el => el.addEventListener('click', () => {
+    if(navigator.clipboard) navigator.clipboard.writeText(el.dataset.mail).then(() => showToast('Adresse copiée : ' + el.dataset.mail)).catch(() => {});
+  }));
+}
+async function gxMembresCharger(){
+  const liste = document.getElementById('gx-membres-liste');
+  if(liste) liste.innerHTML = '<div class="admin-empty">Chargement…</div>';
+  try{
+    const [us, regs, notifs] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(query(collection(db, 'registrations'), where('approved', '==', true))).catch(() => null),
+      getDocs(query(collection(db, 'notifications'), where('type', '==', 'email_change'))).catch(() => null)
+    ]);
+    const arenes = {};
+    if(regs) regs.forEach(d => { const e = (d.data().email || '').toLowerCase(); if(e) arenes[e] = (arenes[e] || 0) + 1; });
+    const changements = {};
+    if(notifs) notifs.forEach(d => { const x = d.data(); if(x.ancien && !x.traite) changements[x.ancien] = x.nouveau; });
+    gxMembres = [];
+    us.forEach(d => { const x = d.data(); const e = (x.email || '').toLowerCase(); gxMembres.push({ pseudo: x.pseudo, email: e, avatar: x.avatar, createdAt: x.createdAt, arenes: arenes[e] || 0, changement: changements[e] || null }); });
+    gxMembres.sort((a, b) => (a.pseudo || '').localeCompare(b.pseudo || '', 'fr', { sensitivity: 'base' }));
+    gxMembresCharges = true;
+    gxMembresRendu();
+  }catch(e){
+    if(liste) liste.innerHTML = '<div class="admin-empty">Impossible de charger les membres : ' + gxEchap(e.message) + '</div>';
+  }
+}
+const gxTabMembres = document.getElementById('admin-tab-membres');
+if(gxTabMembres) gxTabMembres.addEventListener('click', () => { if(!gxMembresCharges) gxMembresCharger(); });
+const gxMembresRech = document.getElementById('gx-membres-recherche');
+if(gxMembresRech) gxMembresRech.addEventListener('input', gxMembresRendu);
+const gxMembresMaj = document.getElementById('gx-membres-maj');
+if(gxMembresMaj) gxMembresMaj.addEventListener('click', gxMembresCharger);
+const gxMembresCopier = document.getElementById('gx-membres-copier');
+if(gxMembresCopier) gxMembresCopier.addEventListener('click', () => {
+  const t = gxMembres.map(m => m.email).filter(Boolean).join(', ');
+  if(navigator.clipboard && t) navigator.clipboard.writeText(t).then(() => showToast(gxMembres.length + ' adresses copiées.')).catch(() => {});
+});
+const gxMembresCsv = document.getElementById('gx-membres-csv');
+if(gxMembresCsv) gxMembresCsv.addEventListener('click', () => {
+  const lignes = [['Pseudo', 'E-mail', 'Inscrit le', 'Arènes']].concat(gxMembres.map(m => [m.pseudo || '', m.email || '', gxDateFr(m.createdAt), String(m.arenes || 0)]));
+  const csv = String.fromCharCode(0xFEFF) + lignes.map(l => l.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'membres-galactix.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+});
 let gxLastGamesSnap = null;
 window.__gxRenderAdminGames = () => { if(gxLastGamesSnap) gxRenderGamesSnapshot(gxLastGamesSnap); };
 onSnapshot(collection(db, 'games'), (snap) => { gxLastGamesSnap = snap; gxRenderGamesSnapshot(snap); });
